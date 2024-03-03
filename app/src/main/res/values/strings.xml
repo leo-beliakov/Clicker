@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Clicker</string>
+
+    <string name="upgrade_click_income_title">Increase Income</string>
+    <string name="upgrade_click_income_text">Increase Click Income By 20%</string>
+    <string name="upgrade_add_cursor_title">Add Cursor</string>
+    <string name="upgrade_add_cursor_text">Add a New Cursor</string>
+    <string name="upgrade_merge_cursors_title">Merge Cursors</string>
+    <string name="upgrade_merge_cursors_text">Merge 3 Identical Cursors To Get Better</string>
+    <string name="upgrade_cursor_income_title">Cursor Income</string>
+    <string name="upgrade_cursor_income_text">Increase Cursor's Revenue By 10%</string>
+    <string name="upgrade_cursor_speed_title">Cursor Speed</string>
+    <string name="upgrade_cursor_speed_text">Increase Cursor's Speed</string>
+</resources>
