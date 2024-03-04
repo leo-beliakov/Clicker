@@ -3,6 +3,7 @@ package com.apps.leo.clicker.game.ui
 import androidx.lifecycle.ViewModel
 import com.apps.leo.clicker.game.domain.GetInitialUpgradesUseCase
 import com.apps.leo.clicker.game.domain.model.UpgradeType
+import com.apps.leo.clicker.game.ui.model.GameAction
 import com.apps.leo.clicker.game.ui.model.GameState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,7 +23,7 @@ class GameViewModel @Inject constructor(
         return GameState(
             levelText = "Level 1",
             levelPercentage = 0.2f,
-            boosters = listOf(),
+            boosts = listOf(),
             statistics = GameState.Statistics(
                 total = "$12.3 K",
                 passive = "1.3 K/Sec",
@@ -42,5 +43,16 @@ class GameViewModel @Inject constructor(
                 )
             },
         )
+    }
+
+    fun onAction(action: GameAction) {
+        when (action) {
+            is GameAction.OnClickerClicked -> {}
+            is GameAction.OnBoostClicked -> {}
+            is GameAction.OnUpgradeButtonClicked -> {}
+            GameAction.OnCustomizeClicked -> {}
+            GameAction.OnSettingsClicked -> {}
+            GameAction.OnStatsClicked -> {}
+        }
     }
 }

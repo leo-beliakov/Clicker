@@ -7,11 +7,12 @@ import com.apps.leo.clicker.R
 data class GameState(
     val levelText: String,
     val levelPercentage: Float,
-    val boosters: List<Booster>,
+    val boosts: List<Boost>,
     val statistics: Statistics,
     val upgradeButtons: List<UpgradeButtonState>
 ) {
-    data class Booster(
+    data class Boost(
+        val id: String,
         val text: String
     )
 
@@ -35,27 +36,27 @@ data class GameState(
             CLICK_INCOME(
                 titleResId = R.string.upgrade_click_income_title,
                 textResId = R.string.upgrade_click_income_text,
-                iconResId = 0
+                iconResId = R.drawable.ic_cursor_upgrade
             ),
             ADD_CURSOR(
                 titleResId = R.string.upgrade_add_cursor_title,
                 textResId = R.string.upgrade_add_cursor_text,
-                iconResId = 0
+                iconResId = R.drawable.ic_cursor_upgrade
             ),
             MERGE_CURSORS(
                 titleResId = R.string.upgrade_merge_cursors_title,
                 textResId = R.string.upgrade_merge_cursors_text,
-                iconResId = 0
+                iconResId = R.drawable.ic_cursor_upgrade
             ),
             CURSOR_INCOME(
                 titleResId = R.string.upgrade_cursor_income_title,
                 textResId = R.string.upgrade_cursor_income_text,
-                iconResId = 0
+                iconResId = R.drawable.ic_cursor_upgrade
             ),
             CURSOR_SPEED(
                 titleResId = R.string.upgrade_cursor_speed_title,
                 textResId = R.string.upgrade_cursor_speed_text,
-                iconResId = 0
+                iconResId = R.drawable.ic_cursor_upgrade
             )
         }
     }
