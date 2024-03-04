@@ -22,7 +22,7 @@ class GameViewModel @Inject constructor(
         val upgrades = getInitialUpgrades()
         return GameState(
             levelText = "Level 1",
-            levelPercentage = 0.2f,
+            levelPercentage = 0.3f,
             boosts = listOf(),
             statistics = GameState.Statistics(
                 total = "$12.3 K",
