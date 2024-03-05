@@ -100,38 +100,6 @@ fun LevelSection(
                 }
         )
     }
-
-//
-//    Box(
-//        contentAlignment = Alignment.Center,
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .padding(vertical = 12.dp)
-//    ) {
-//        Box(
-//            modifier = Modifier
-//                .fillMaxWidth(LEVEL_WIDTH_FRACTION)
-//                .border(
-//                    border = borderStroke,
-//                    shape = RoundedCornerShape(12.dp)
-//                )
-//                .background(
-//                    color = animatedColor,
-//                    shape = RoundedCornerShape(12.dp)
-//                )
-//                .padding(12.dp)
-//        ) {
-//            Text(
-//                text = "$levelText, $levelPercentage",
-//                style = TextStyle(
-//                    color = Color.Black,
-//                    fontSize = 16.sp,
-//                    fontWeight = FontWeight.Bold,
-//                ),
-//                modifier = Modifier.align(Alignment.Center)
-//            )
-//        }
-//    }
 }
 
 @Preview
