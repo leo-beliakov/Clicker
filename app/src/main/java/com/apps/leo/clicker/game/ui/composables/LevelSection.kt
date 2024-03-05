@@ -61,15 +61,17 @@ fun LevelSection(
                         topLeft = Offset(halfBorderWidth, halfBorderWidth),
                         size = Size(size.width - borderWidth, size.height - borderWidth),
                     )
-                    drawRect(
-                        color = animatedColor,
-                        style = Fill,
-                        topLeft = Offset(halfBorderWidth, halfBorderWidth),
-                        size = Size(
-                            size.width * levelPercentage - borderWidth,
-                            size.height - borderWidth
-                        ),
-                    )
+                    if (levelPercentage > 0f) {
+                        drawRect(
+                            color = animatedColor,
+                            style = Fill,
+                            topLeft = Offset(halfBorderWidth, halfBorderWidth),
+                            size = Size(
+                                size.width * levelPercentage - borderWidth,
+                                size.height - borderWidth
+                            ),
+                        )
+                    }
                     drawRoundRect(
                         color = Color.Blue,
                         style = Stroke(width = 4.dp.toPx()),

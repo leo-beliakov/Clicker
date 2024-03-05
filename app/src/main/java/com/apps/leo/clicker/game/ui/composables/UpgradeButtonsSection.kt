@@ -38,12 +38,12 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.apps.leo.clicker.game.ui.model.GameState
+import com.apps.leo.clicker.game.ui.model.GameUiState
 import com.apps.leo.clicker.ui.theme.ClickerTheme
 
 @Composable
 fun UpgradeButtonsSection(
-    upgrades: List<GameState.UpgradeButtonState>,
+    upgrades: List<GameUiState.UpgradeButtonState>,
     onButtonClicked: () -> Unit
 ) {
     Column(
@@ -63,7 +63,7 @@ fun UpgradeButtonsSection(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun UpgradeButton(
-    state: GameState.UpgradeButtonState,
+    state: GameUiState.UpgradeButtonState,
     onButtonClicked: () -> Unit
 ) {
     var isPressed by remember { mutableStateOf(false) }
@@ -172,8 +172,8 @@ fun UpgradeButton(
 private fun UpgradeButtonPreview() {
     ClickerTheme {
         UpgradeButton(
-            state = GameState.UpgradeButtonState(
-                type = GameState.UpgradeButtonState.UpgradeType.CLICK_INCOME,
+            state = GameUiState.UpgradeButtonState(
+                type = GameUiState.UpgradeButtonState.UpgradeType.CLICK_INCOME,
                 priceText = "100$",
                 isAvailable = true,
                 hasFreeBoost = true,

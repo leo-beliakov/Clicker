@@ -14,7 +14,7 @@ import com.apps.leo.clicker.game.ui.composables.ClickerSection
 import com.apps.leo.clicker.game.ui.composables.LevelSection
 import com.apps.leo.clicker.game.ui.composables.UpgradeButtonsSection
 import com.apps.leo.clicker.game.ui.model.GameAction
-import com.apps.leo.clicker.game.ui.model.GameState
+import com.apps.leo.clicker.game.ui.model.GameUiState
 
 @Composable
 fun GameScreen(
@@ -30,7 +30,7 @@ fun GameScreen(
 
 @Composable
 private fun GameScreen(
-    state: GameState,
+    state: GameUiState,
     onAction: (GameAction) -> Unit
 ) {
     Column(
@@ -47,7 +47,7 @@ private fun GameScreen(
             state.boosts,
             state.statistics,
             onBoostClicked = {},
-            onClickerClicked = {}
+            onClickerClicked = { onAction(GameAction.OnClickerClicked) }
         )
         UpgradeButtonsSection(
             upgrades = state.upgradeButtons,

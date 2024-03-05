@@ -5,6 +5,13 @@ import androidx.annotation.StringRes
 import com.apps.leo.clicker.R
 
 data class GameState(
+    val totalBalance: Long,
+    val clickIncome: Long,
+    val passiveIncome: Long,
+    val levelProgress: Float,
+)
+
+data class GameUiState(
     val levelText: String,
     val levelPercentage: Float,
     val boosts: List<Boost>,

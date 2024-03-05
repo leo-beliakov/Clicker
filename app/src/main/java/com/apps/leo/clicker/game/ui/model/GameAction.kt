@@ -6,10 +6,10 @@ sealed interface GameAction {
     object OnStatsClicked : GameAction
     object OnCustomizeClicked : GameAction
     data class OnBoostClicked(
-        val boost: GameState.Boost
+        val boost: GameUiState.Boost
     ) : GameAction
 
     data class OnUpgradeButtonClicked(
-        val upgradeButtonState: GameState.UpgradeButtonState
+        val upgradeButtonState: GameUiState.UpgradeButtonState
     ) : GameAction
 }
