@@ -31,6 +31,7 @@ class GameViewModel @Inject constructor(
         _state.onEach { gameState ->
             _stateUi.update { uiState ->
                 uiState.copy(
+                    levelText = "Level ${gameState.currentLevel}",
                     levelPercentage = gameState.levelProgress,
                     statistics = GameUiState.Statistics(
                         total = formatBalance(gameState.totalBalance),
@@ -41,28 +42,20 @@ class GameViewModel @Inject constructor(
         }.launchIn(viewModelScope)
     }
 
-    private fun formatIncome(passiveIncome: Long): String {
-        val formatedMoney = formatAmountOfMoney(passiveIncome)
-        return "$formatedMoney/ Sec"
-    }
-
-    private fun formatBalance(totalBalance: Long): String {
-        return formatAmountOfMoney(totalBalance)
-    }
-
     private fun getInitialGameState(): GameState {
         return GameState(
             totalBalance = 0L,
             clickIncome = 100L,
             passiveIncome = 0L,
             levelProgress = 0f,
+            currentLevel = 1,
         )
     }
 
     private fun getInitialUIGameState(): GameUiState {
         val upgrades = getInitialUpgrades()
         return GameUiState(
-            levelText = "Level 1",
+            levelText = "",
             levelPercentage = 0f,
             boosts = listOf(),
             statistics = GameUiState.Statistics(
@@ -86,13 +79,28 @@ class GameViewModel @Inject constructor(
         )
     }
 
+    private fun formatIncome(passiveIncome: Long): String {
+        val formatedMoney = formatAmountOfMoney(passiveIncome)
+        return "$formatedMoney/ Sec"
+    }
+
+    private fun formatBalance(totalBalance: Long): String {
+        return formatAmountOfMoney(totalBalance)
+    }
+
     fun onAction(action: GameAction) {
         when (action) {
             is GameAction.OnClickerClicked -> {
                 _state.update {
+                    val levelProgress = it.levelProgress + LEVEL_PROGRESS_PER_CLICK
+                    val isLevelCompleted = (levelProgress) >= 1f
+                    val levelProcessNormalized = if (isLevelCompleted) 0f else levelProgress
+                    val newLevel = if (isLevelCompleted) it.currentLevel + 1 else it.currentLevel
+
                     it.copy(
                         totalBalance = it.totalBalance + it.clickIncome,
-                        levelProgress = it.levelProgress + LEVEL_PROGRESS_PER_CLICK
+                        currentLevel = newLevel,
+                        levelProgress = levelProcessNormalized
                     )
                 }
             }

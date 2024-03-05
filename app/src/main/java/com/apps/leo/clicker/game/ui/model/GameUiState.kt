@@ -8,6 +8,7 @@ data class GameState(
     val totalBalance: Long,
     val clickIncome: Long,
     val passiveIncome: Long,
+    val currentLevel: Int,
     val levelProgress: Float,
 )
 
