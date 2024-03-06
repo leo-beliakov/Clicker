@@ -1,6 +1,7 @@
 package com.apps.leo.clicker.game.ui.mapper
 
 import com.apps.leo.clicker.R
+import com.apps.leo.clicker.game.common.ui.formatAmountOfMoney
 import com.apps.leo.clicker.game.domain.model.Upgrade
 import com.apps.leo.clicker.game.domain.model.UpgradeType
 import com.apps.leo.clicker.game.ui.model.GameUiState
@@ -14,7 +15,11 @@ class GameStateMapper @Inject constructor() {
         return GameUiState.UpgradeButtonState(
             type = upgrade.type,
             price = upgrade.price,
-            priceText = "${upgrade.price}$",
+            priceText = formatAmountOfMoney(
+                amount = upgrade.price,
+                moneySymbol = "",
+                spaceSymbol = ""
+            ),
             isAvailable = upgrade.price <= totalBalance,
             hasFreeBoost = false,
             titleResId = when (upgrade.type) {

@@ -121,4 +121,6 @@ class MoneyFormatterTest {
         //Assert
         Assert.assertEquals(expected, result)
     }
+
+    //todo add tests with new parameters
 }

@@ -59,7 +59,7 @@ fun UpgradeButtonsSection(
     val textMeasurer = rememberTextMeasurer()
     val priceWidthLimit = remember {
         textMeasurer.measure(
-            text = "999.9K$",
+            text = "999.99K",
             style = TextStyle(
                 color = Color.Black,
                 fontSize = 16.sp,
@@ -207,7 +207,7 @@ private fun ButtonContent(
                 .align(Alignment.CenterVertically)
                 .border(border = borderStroke, shape = RoundedCornerShape(12.dp))
                 .background(color = Color.Green, shape = RoundedCornerShape(12.dp))
-                .padding(vertical = 8.dp, horizontal = 12.dp)
+                .padding(8.dp)
                 .width(priceButtonWidth)
         ) {
             Text(

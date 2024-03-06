@@ -2,7 +2,11 @@ package com.apps.leo.clicker.game.common.ui
 
 import java.text.DecimalFormat
 
-fun formatAmountOfMoney(amount: Long): String {
+fun formatAmountOfMoney(
+    amount: Long,
+    moneySymbol: String = "$",
+    spaceSymbol: String = " ",
+): String {
     val numberLength = amount.toString().length
     val significantNumbersCount = numberLength % 3
     var totalDigitsGoup = if (significantNumbersCount == 0) {
@@ -23,5 +27,9 @@ fun formatAmountOfMoney(amount: Long): String {
     val formatter = DecimalFormat("#.##")
     val formattedAmmount = formatter.format(amount / divisor)
 
-    return magnitudeSuffix?.let { "$$formattedAmmount $magnitudeSuffix" } ?: "$$formattedAmmount"
+    return if (magnitudeSuffix == null) {
+        "$moneySymbol$formattedAmmount"
+    } else {
+        "$moneySymbol$formattedAmmount$spaceSymbol$magnitudeSuffix"
+    }
 }
