@@ -1,11 +1,13 @@
 package com.apps.leo.clicker.game.ui
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apps.leo.clicker.game.common.ui.formatAmountOfMoney
 import com.apps.leo.clicker.game.domain.CalculatePassiveIncomeUseCase
 import com.apps.leo.clicker.game.domain.GetInitialUpgradesUseCase
 import com.apps.leo.clicker.game.domain.GetUpgradePriceUseCase
+import com.apps.leo.clicker.game.domain.PASSIVE_INCOME_WORKERS_REQUIRED_FOR_UPGRADE
 import com.apps.leo.clicker.game.domain.model.UpgradeType
 import com.apps.leo.clicker.game.ui.mapper.GameStateMapper
 import com.apps.leo.clicker.game.ui.model.GameAction
@@ -44,6 +46,10 @@ class GameViewModel @Inject constructor(
 
     init {
         _state.onEach { gameState ->
+            Log.d(
+                "MyTag",
+                "workers = ${gameState.passiveIncome.workers.map { "lvl = ${it.level}" }}"
+            )
             _stateUi.update { uiState ->
                 uiState.copy(
                     levelText = "Level ${gameState.currentLevel}",
@@ -178,6 +184,7 @@ class GameViewModel @Inject constructor(
                 UpgradeType.ADD_CURSOR -> {
                     val updatedWorkersList = it.passiveIncome.workers.toMutableList()
                     updatedWorkersList.add(GameState.PassiveIncome.Worker())
+                    updatedWorkersList.sortBy { it.level }
 
                     it.copy(
                         passiveIncome = it.passiveIncome.copy(
@@ -187,18 +194,43 @@ class GameViewModel @Inject constructor(
                 }
 
                 UpgradeType.MERGE_CURSORS -> {
-                    // merge passive income miners
-                    it
+                    val workers = it.passiveIncome.workers
+                    val updatedWorkersList = workers.toMutableList()
+                    val workersLevels = workers.map { it.level }.toSet()
+
+                    for (level in workersLevels) {
+                        if (workers.count { it.level == level } >= PASSIVE_INCOME_WORKERS_REQUIRED_FOR_UPGRADE) {
+                            repeat(PASSIVE_INCOME_WORKERS_REQUIRED_FOR_UPGRADE) {
+                                val workerToRemove = updatedWorkersList.first { it.level == level }
+                                updatedWorkersList.remove(workerToRemove)
+                            }
+                            updatedWorkersList.add(GameState.PassiveIncome.Worker(level = level + 1))
+                            updatedWorkersList.sortBy { it.level }
+                            break
+                        }
+                    }
+
+                    it.copy(
+                        passiveIncome = it.passiveIncome.copy(
+                            workers = updatedWorkersList.toList()
+                        )
+                    )
                 }
 
                 UpgradeType.CURSOR_INCOME -> {
-                    // increase passive income per miner
-                    it
+                    it.copy(
+                        passiveIncome = it.passiveIncome.copy(
+                            incomePerWorkder = (it.passiveIncome.incomePerWorkder * 1.1).toLong()
+                        )
+                    )
                 }
 
                 UpgradeType.CURSOR_SPEED -> {
-                    // increase speed of passive income miners
-                    it
+                    it.copy(
+                        passiveIncome = it.passiveIncome.copy(
+                            speedOfWorkders = it.passiveIncome.speedOfWorkders * 1.1f
+                        )
+                    )
                 }
             }
 
