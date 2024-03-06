@@ -46,13 +46,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.apps.leo.clicker.R
+import com.apps.leo.clicker.game.domain.model.UpgradeType
 import com.apps.leo.clicker.game.ui.model.GameUiState
 import com.apps.leo.clicker.ui.theme.ClickerTheme
 
 @Composable
 fun UpgradeButtonsSection(
     upgrades: List<GameUiState.UpgradeButtonState>,
-    onButtonClicked: () -> Unit
+    onButtonClicked: (GameUiState.UpgradeButtonState) -> Unit
 ) {
     val textMeasurer = rememberTextMeasurer()
     val priceWidthLimit = remember {
@@ -87,7 +89,7 @@ fun UpgradeButtonsSection(
 fun UpgradeButton(
     state: GameUiState.UpgradeButtonState,
     priceButtonWidth: Dp,
-    onButtonClicked: () -> Unit
+    onButtonClicked: (GameUiState.UpgradeButtonState) -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -126,7 +128,7 @@ private fun ButtonInactiveIndicator() {
 private fun ButtonContent(
     state: GameUiState.UpgradeButtonState,
     priceButtonWidth: Dp,
-    onButtonClicked: () -> Unit
+    onButtonClicked: (GameUiState.UpgradeButtonState) -> Unit
 ) {
     val borderStroke = BorderStroke(4.dp, Color.Blue)
     var isPressed by remember { mutableStateOf(false) }
@@ -151,7 +153,7 @@ private fun ButtonContent(
                 role = Role.Button,
                 onClick = {
                     isPressed = true
-                    onButtonClicked()
+                    onButtonClicked(state)
                 }
             )
             .border(
@@ -166,7 +168,7 @@ private fun ButtonContent(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Image(
-            painter = painterResource(id = state.type.iconResId),
+            painter = painterResource(id = state.iconResId),
             contentDescription = null,
             modifier = Modifier
                 .size(56.dp)
@@ -183,7 +185,7 @@ private fun ButtonContent(
             modifier = Modifier.weight(weight = 1f, fill = true)
         ) {
             Text(
-                text = stringResource(id = state.type.titleResId),
+                text = stringResource(id = state.titleResId),
                 style = TextStyle(
                     color = Color.Black,
                     fontSize = 16.sp,
@@ -191,7 +193,7 @@ private fun ButtonContent(
                 )
             )
             Text(
-                text = stringResource(id = state.type.textResId),
+                text = stringResource(id = state.textResId),
                 style = TextStyle(
                     color = if (state.isAvailable) Color.DarkGray else Color.White,
                     fontSize = 12.sp,
@@ -226,14 +228,16 @@ private fun UpgradeButtonPreview() {
     ClickerTheme {
         UpgradeButton(
             state = GameUiState.UpgradeButtonState(
-                type = GameUiState.UpgradeButtonState.UpgradeType.CLICK_INCOME,
+                type = UpgradeType.CLICK_INCOME,
                 price = 100L,
                 priceText = "100$",
                 isAvailable = true,
                 hasFreeBoost = true,
+                titleResId = R.string.upgrade_click_income_title,
+                textResId = R.string.upgrade_click_income_text,
+                iconResId = R.drawable.ic_cursor_upgrade,
             ),
-            priceButtonWidth = 50.dp,
-            onButtonClicked = {}
-        )
+            priceButtonWidth = 50.dp
+        ) {}
     }
 }

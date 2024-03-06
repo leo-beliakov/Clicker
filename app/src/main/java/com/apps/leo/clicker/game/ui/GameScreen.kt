@@ -51,7 +51,7 @@ private fun GameScreen(
         )
         UpgradeButtonsSection(
             upgrades = state.upgradeButtons,
-            onButtonClicked = {}
+            onButtonClicked = { onAction(GameAction.OnUpgradeButtonClicked(it)) }
         )
     }
 }

@@ -2,7 +2,8 @@ package com.apps.leo.clicker.game.ui.model
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import com.apps.leo.clicker.R
+import com.apps.leo.clicker.game.domain.model.Upgrade
+import com.apps.leo.clicker.game.domain.model.UpgradeType
 
 data class GameState(
     val totalBalance: Long,
@@ -10,14 +11,15 @@ data class GameState(
     val passiveIncome: Long,
     val currentLevel: Int,
     val levelProgress: Float,
+    val upgrades: List<Upgrade>,
 )
 
 data class GameUiState(
     val levelText: String,
     val levelPercentage: Float,
-    val boosts: List<Boost>,
-    val statistics: Statistics,
-    val upgradeButtons: List<UpgradeButtonState>
+    val boosts: List<Boost> = emptyList(),
+    val statistics: Statistics = Statistics(),
+    val upgradeButtons: List<UpgradeButtonState> = emptyList()
 ) {
     data class Boost(
         val id: String,
@@ -25,8 +27,8 @@ data class GameUiState(
     )
 
     data class Statistics(
-        val total: String,
-        val passive: String
+        val total: String = "",
+        val passive: String = ""
     )
 
     data class UpgradeButtonState(
@@ -34,39 +36,9 @@ data class GameUiState(
         val price: Long,
         val priceText: String,
         val isAvailable: Boolean,
-        val hasFreeBoost: Boolean
-    ) {
-
-        enum class UpgradeType(
-            @StringRes val titleResId: Int,
-            @StringRes val textResId: Int,
-            @DrawableRes val iconResId: Int,
-        ) {
-            CLICK_INCOME(
-                titleResId = R.string.upgrade_click_income_title,
-                textResId = R.string.upgrade_click_income_text,
-                iconResId = R.drawable.ic_cursor_upgrade
-            ),
-            ADD_CURSOR(
-                titleResId = R.string.upgrade_add_cursor_title,
-                textResId = R.string.upgrade_add_cursor_text,
-                iconResId = R.drawable.ic_cursor_upgrade
-            ),
-            MERGE_CURSORS(
-                titleResId = R.string.upgrade_merge_cursors_title,
-                textResId = R.string.upgrade_merge_cursors_text,
-                iconResId = R.drawable.ic_cursor_upgrade
-            ),
-            CURSOR_INCOME(
-                titleResId = R.string.upgrade_cursor_income_title,
-                textResId = R.string.upgrade_cursor_income_text,
-                iconResId = R.drawable.ic_cursor_upgrade
-            ),
-            CURSOR_SPEED(
-                titleResId = R.string.upgrade_cursor_speed_title,
-                textResId = R.string.upgrade_cursor_speed_text,
-                iconResId = R.drawable.ic_cursor_upgrade
-            )
-        }
-    }
+        val hasFreeBoost: Boolean,
+        @StringRes val titleResId: Int,
+        @StringRes val textResId: Int,
+        @DrawableRes val iconResId: Int
+    )
 }

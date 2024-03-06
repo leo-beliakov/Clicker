@@ -4,7 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apps.leo.clicker.game.common.ui.formatAmountOfMoney
 import com.apps.leo.clicker.game.domain.GetInitialUpgradesUseCase
+import com.apps.leo.clicker.game.domain.GetUpgradePriceUseCase
 import com.apps.leo.clicker.game.domain.model.UpgradeType
+import com.apps.leo.clicker.game.ui.mapper.GameStateMapper
 import com.apps.leo.clicker.game.ui.model.GameAction
 import com.apps.leo.clicker.game.ui.model.GameState
 import com.apps.leo.clicker.game.ui.model.GameUiState
@@ -26,7 +28,9 @@ private const val LEVEL_PROGRESS_DECREASE_PER_TICK = 0.02f
 
 @HiltViewModel
 class GameViewModel @Inject constructor(
-    private val getInitialUpgrades: GetInitialUpgradesUseCase
+    private val getInitialUpgrades: GetInitialUpgradesUseCase,
+    private val getUpgradePrice: GetUpgradePriceUseCase,
+    private val mapper: GameStateMapper,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(getInitialGameState())
@@ -43,10 +47,8 @@ class GameViewModel @Inject constructor(
                         total = formatBalance(gameState.totalBalance),
                         passive = formatIncome(gameState.passiveIncome)
                     ),
-                    upgradeButtons = uiState.upgradeButtons.map { buttonState ->
-                        buttonState.copy(
-                            isAvailable = buttonState.price <= gameState.totalBalance
-                        )
+                    upgradeButtons = gameState.upgrades.map {//todo i don't like that we have to map it on every state change
+                        mapper.mapUpgradeToButtonState(it, gameState.totalBalance)
                     }
                 )
             }
@@ -72,38 +74,18 @@ class GameViewModel @Inject constructor(
     private fun getInitialGameState(): GameState {
         return GameState(
             totalBalance = 0L,
-            clickIncome = 100L,
+            clickIncome = 100L, //todo should be specific per map
             passiveIncome = 0L,
             levelProgress = 0f,
             currentLevel = 1,
+            upgrades = getInitialUpgrades()
         )
     }
 
     private fun getInitialUIGameState(): GameUiState {
-        val upgrades = getInitialUpgrades()
         return GameUiState(
             levelText = "",
-            levelPercentage = 0f,
-            boosts = listOf(),
-            statistics = GameUiState.Statistics(
-                total = "",
-                passive = "",
-            ),
-            upgradeButtons = upgrades.map { upgrade ->
-                GameUiState.UpgradeButtonState(
-                    price = upgrade.price,
-                    priceText = "${upgrade.price}$",
-                    isAvailable = true,
-                    hasFreeBoost = false,
-                    type = when (upgrade.type) {
-                        UpgradeType.CLICK_INCOME -> GameUiState.UpgradeButtonState.UpgradeType.CLICK_INCOME
-                        UpgradeType.ADD_CURSOR -> GameUiState.UpgradeButtonState.UpgradeType.ADD_CURSOR
-                        UpgradeType.MERGE_CURSORS -> GameUiState.UpgradeButtonState.UpgradeType.MERGE_CURSORS
-                        UpgradeType.CURSOR_INCOME -> GameUiState.UpgradeButtonState.UpgradeType.CURSOR_INCOME
-                        UpgradeType.CURSOR_SPEED -> GameUiState.UpgradeButtonState.UpgradeType.CURSOR_SPEED
-                    }
-                )
-            },
+            levelPercentage = 0f
         )
     }
 
@@ -118,7 +100,7 @@ class GameViewModel @Inject constructor(
 
     fun onAction(action: GameAction) {
         when (action) {
-            is GameAction.OnClickerClicked -> {
+            GameAction.OnClickerClicked -> {
                 _state.update {
                     val levelProgress = it.levelProgress + LEVEL_PROGRESS_PER_CLICK
                     val isLevelCompleted =
@@ -136,7 +118,64 @@ class GameViewModel @Inject constructor(
             }
 
             is GameAction.OnBoostClicked -> {}
-            is GameAction.OnUpgradeButtonClicked -> {}
+
+            is GameAction.OnUpgradeButtonClicked -> {
+                val buttonState = action.upgradeButtonState
+                val upgradePrice = buttonState.price
+
+                _state.update {
+                    val indexOfUpgrade =
+                        it.upgrades.indexOfFirst { it.type == action.upgradeButtonState.type }
+                    val upgrade = it.upgrades[indexOfUpgrade]
+                    val upgradeUpdatedLevel = upgrade.level + 1
+                    val updatedUpgrade = upgrade.copy(
+                        level = upgrade.level + 1,
+                        price = getUpgradePrice(upgrade.type, upgradeUpdatedLevel)
+                    )
+
+                    val updatedUpgradesList = it.upgrades.toMutableList() //todo move to utils?
+                    updatedUpgradesList.removeAt(indexOfUpgrade)
+                    updatedUpgradesList.add(indexOfUpgrade, updatedUpgrade)
+
+                    //apply effects of the upgrade
+                    val updatedState = when (upgrade.type) {
+                        UpgradeType.CLICK_INCOME -> {
+                            //increase income per click
+                            it.copy(
+                                clickIncome = it.clickIncome * 2
+                            )
+                        }
+
+                        UpgradeType.ADD_CURSOR -> {
+                            // add one passive income miner
+                            it
+                        }
+
+                        UpgradeType.MERGE_CURSORS -> {
+                            // merge passive income miners
+                            it
+                        }
+
+                        UpgradeType.CURSOR_INCOME -> {
+                            // increase passive income per miner
+                            it
+                        }
+
+                        UpgradeType.CURSOR_SPEED -> {
+                            // increase speed of passive income miners
+                            it
+                        }
+                    }
+
+                    updatedState.copy(
+                        totalBalance = it.totalBalance - upgradePrice,
+                        upgrades = updatedUpgradesList.toList()
+                    )
+                }
+
+
+            }
+
             GameAction.OnCustomizeClicked -> {}
             GameAction.OnSettingsClicked -> {}
             GameAction.OnStatsClicked -> {}
