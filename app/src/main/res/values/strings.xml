@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Clicker</string>
 
+    <string name="upgrade_max">MAX</string>
+
     <string name="upgrade_click_income_title">INCREASE INCOME</string>
     <string name="upgrade_click_income_text">Increase Click Income By 20%</string>
     <string name="upgrade_add_cursor_title">ADD CURSOR</string>

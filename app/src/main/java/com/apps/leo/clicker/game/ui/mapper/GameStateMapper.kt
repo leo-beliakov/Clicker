@@ -2,15 +2,20 @@ package com.apps.leo.clicker.game.ui.mapper
 
 import com.apps.leo.clicker.R
 import com.apps.leo.clicker.game.common.ui.formatAmountOfMoney
+import com.apps.leo.clicker.game.domain.CheckIfUpgradeIsMaxUseCase
 import com.apps.leo.clicker.game.domain.model.Upgrade
 import com.apps.leo.clicker.game.domain.model.UpgradeType
+import com.apps.leo.clicker.game.ui.model.GameState
 import com.apps.leo.clicker.game.ui.model.GameUiState
 import javax.inject.Inject
 
-class GameStateMapper @Inject constructor() {
+class GameStateMapper @Inject constructor(
+    private val checkIfUpgradeIsMax: CheckIfUpgradeIsMaxUseCase
+) {
+
     fun mapUpgradeToButtonState(
         upgrade: Upgrade,
-        totalBalance: Long
+        gameState: GameState
     ): GameUiState.UpgradeButtonState {
         return GameUiState.UpgradeButtonState(
             type = upgrade.type,
@@ -20,7 +25,8 @@ class GameStateMapper @Inject constructor() {
                 moneySymbol = "",
                 spaceSymbol = ""
             ),
-            isAvailable = upgrade.price <= totalBalance,
+            isMax = checkIfUpgradeIsMax(upgrade, gameState),
+            isAvailable = upgrade.price <= gameState.totalBalance,
             hasFreeBoost = false,
             titleResId = when (upgrade.type) {
                 UpgradeType.CLICK_INCOME -> R.string.upgrade_click_income_title

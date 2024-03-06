@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -105,7 +106,7 @@ fun UpgradeButton(
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
-                enabled = state.isAvailable,
+                enabled = state.isAvailable && !state.isMax,
                 role = Role.Button,
                 onClick = {
                     job?.cancel()
@@ -122,7 +123,7 @@ fun UpgradeButton(
             priceButtonWidth = priceButtonWidth,
         )
         AnimatedVisibility(
-            visible = !state.isAvailable,
+            visible = !state.isAvailable && !state.isMax,
             enter = fadeIn(),
             exit = fadeOut(),
         ) {
@@ -193,30 +194,46 @@ private fun ButtonContent(
             Text(
                 text = stringResource(id = state.textResId),
                 style = TextStyle(
-                    color = if (state.isAvailable) Color.DarkGray else Color.White,
+                    color = if (state.isAvailable || state.isMax) Color.DarkGray else Color.White,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
                 )
             )
         }
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .align(Alignment.CenterVertically)
-                .border(border = borderStroke, shape = RoundedCornerShape(12.dp))
-                .background(color = Color.Green, shape = RoundedCornerShape(12.dp))
-                .padding(8.dp)
-                .width(priceButtonWidth)
-        ) {
-            Text(
-                text = state.priceText,
-                style = TextStyle(
-                    color = Color.Black,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                )
+        PriceButton(
+            isMax = state.isMax,
+            priceText = state.priceText,
+            priceButtonWidth = priceButtonWidth
+        )
+    }
+}
+
+@Composable
+private fun RowScope.PriceButton(
+    isMax: Boolean,
+    priceText: String,
+    priceButtonWidth: Dp
+) {
+    val backgroundColor = if (isMax) Color.Gray else Color.Green
+    val buttonText = if (isMax) stringResource(id = R.string.upgrade_max) else priceText
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .align(Alignment.CenterVertically)
+            .border(border = BorderStroke(4.dp, Color.Blue), shape = RoundedCornerShape(12.dp))
+            .background(color = backgroundColor, shape = RoundedCornerShape(12.dp))
+            .padding(8.dp)
+            .width(priceButtonWidth)
+    ) {
+        Text(
+            text = buttonText,
+            style = TextStyle(
+                color = Color.Black,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
             )
-        }
+        )
     }
 }
 
@@ -229,6 +246,7 @@ private fun UpgradeButtonPreview() {
                 type = UpgradeType.CLICK_INCOME,
                 price = 100L,
                 priceText = "100$",
+                isMax = false,
                 isAvailable = true,
                 hasFreeBoost = true,
                 titleResId = R.string.upgrade_click_income_title,
