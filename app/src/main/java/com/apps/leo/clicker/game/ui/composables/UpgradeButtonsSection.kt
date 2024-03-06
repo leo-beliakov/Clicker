@@ -2,6 +2,7 @@ package com.apps.leo.clicker.game.ui.composables
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FloatSpringSpec
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
@@ -24,11 +25,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -50,6 +48,8 @@ import com.apps.leo.clicker.R
 import com.apps.leo.clicker.game.domain.model.UpgradeType
 import com.apps.leo.clicker.game.ui.model.GameUiState
 import com.apps.leo.clicker.ui.theme.ClickerTheme
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 @Composable
 fun UpgradeButtonsSection(
@@ -91,15 +91,35 @@ fun UpgradeButton(
     priceButtonWidth: Dp,
     onButtonClicked: (GameUiState.UpgradeButtonState) -> Unit
 ) {
+    val scale = remember { Animatable(initialValue = 1f) }
+
+    val animationSpec = FloatSpringSpec(0.8f, 2000f) //todo constants + expiriment
+    val scope = rememberCoroutineScope()
+    var job: Job? = null
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(IntrinsicSize.Max)
+            .scale(scale.value)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                enabled = state.isAvailable,
+                role = Role.Button,
+                onClick = {
+                    job?.cancel()
+                    job = scope.launch {
+                        scale.animateTo(0.8f, animationSpec) //todo constant
+                        scale.animateTo(1f, animationSpec)
+                    }
+                    onButtonClicked(state)
+                }
+            )
     ) {
         ButtonContent(
             state = state,
             priceButtonWidth = priceButtonWidth,
-            onButtonClicked = onButtonClicked
         )
         AnimatedVisibility(
             visible = !state.isAvailable,
@@ -127,35 +147,13 @@ private fun ButtonInactiveIndicator() {
 @Composable
 private fun ButtonContent(
     state: GameUiState.UpgradeButtonState,
-    priceButtonWidth: Dp,
-    onButtonClicked: (GameUiState.UpgradeButtonState) -> Unit
+    priceButtonWidth: Dp
 ) {
     val borderStroke = BorderStroke(4.dp, Color.Blue)
-    var isPressed by remember { mutableStateOf(false) }
-    val scale = remember { Animatable(initialValue = 1f) }
-
-    LaunchedEffect(isPressed) {
-        if (isPressed) {
-            scale.animateTo(0.8f)
-            scale.animateTo(1f)
-            isPressed = false
-        }
-    }
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .scale(scale.value)
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                enabled = state.isAvailable,
-                role = Role.Button,
-                onClick = {
-                    isPressed = true
-                    onButtonClicked(state)
-                }
-            )
             .border(
                 border = borderStroke,
                 shape = RoundedCornerShape(12.dp)
