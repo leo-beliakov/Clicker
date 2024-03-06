@@ -31,6 +31,7 @@ data class GameUiState(
 
     data class UpgradeButtonState(
         val type: UpgradeType,
+        val price: Long,
         val priceText: String,
         val isAvailable: Boolean,
         val hasFreeBoost: Boolean

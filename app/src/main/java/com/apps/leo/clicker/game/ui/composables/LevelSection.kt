@@ -56,7 +56,7 @@ fun LevelSection(
                     val halfBorderWidth = borderWidth / 2f
 
                     drawRect(
-                        color = Color.Gray,
+                        color = Color.LightGray,
                         style = Fill,
                         topLeft = Offset(halfBorderWidth, halfBorderWidth),
                         size = Size(size.width - borderWidth, size.height - borderWidth),

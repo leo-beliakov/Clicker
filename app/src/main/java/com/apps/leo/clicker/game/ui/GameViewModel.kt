@@ -43,6 +43,11 @@ class GameViewModel @Inject constructor(
                         total = formatBalance(gameState.totalBalance),
                         passive = formatIncome(gameState.passiveIncome)
                     ),
+                    upgradeButtons = uiState.upgradeButtons.map { buttonState ->
+                        buttonState.copy(
+                            isAvailable = buttonState.price <= gameState.totalBalance
+                        )
+                    }
                 )
             }
         }.launchIn(viewModelScope)
@@ -86,6 +91,7 @@ class GameViewModel @Inject constructor(
             ),
             upgradeButtons = upgrades.map { upgrade ->
                 GameUiState.UpgradeButtonState(
+                    price = upgrade.price,
                     priceText = "${upgrade.price}$",
                     isAvailable = true,
                     hasFreeBoost = false,
