@@ -17,7 +17,9 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.math.min
 
+private const val NEW_LEVEL_PROGRESS_EXCEED_THRESHOLD = 0.03f
 private const val LEVEL_PROGRESS_PER_CLICK = 0.07f
 private const val LEVEL_PROGRESS_DECREASE_TICK = 60L
 private const val LEVEL_PROGRESS_DECREASE_PER_TICK = 0.02f
@@ -113,8 +115,10 @@ class GameViewModel @Inject constructor(
             is GameAction.OnClickerClicked -> {
                 _state.update {
                     val levelProgress = it.levelProgress + LEVEL_PROGRESS_PER_CLICK
-                    val isLevelCompleted = (levelProgress) >= 1f
-                    val levelProcessNormalized = if (isLevelCompleted) 0f else levelProgress
+                    val isLevelCompleted =
+                        (levelProgress) >= 1f + NEW_LEVEL_PROGRESS_EXCEED_THRESHOLD
+                    val levelProcessNormalized =
+                        if (isLevelCompleted) 0f else min(levelProgress, 1f)
                     val newLevel = if (isLevelCompleted) it.currentLevel + 1 else it.currentLevel
 
                     it.copy(
