@@ -9,14 +9,18 @@ import com.apps.leo.clicker.game.ui.model.GameAction
 import com.apps.leo.clicker.game.ui.model.GameState
 import com.apps.leo.clicker.game.ui.model.GameUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 private const val LEVEL_PROGRESS_PER_CLICK = 0.07f
+private const val LEVEL_PROGRESS_DECREASE_TICK = 60L
+private const val LEVEL_PROGRESS_DECREASE_PER_TICK = 0.02f
 
 @HiltViewModel
 class GameViewModel @Inject constructor(
@@ -40,6 +44,22 @@ class GameViewModel @Inject constructor(
                 )
             }
         }.launchIn(viewModelScope)
+
+        startLevelDecreaseTimer()
+    }
+
+    private fun startLevelDecreaseTimer() {
+        viewModelScope.launch {
+            while (true) {
+                delay(LEVEL_PROGRESS_DECREASE_TICK)
+                _state.update { state ->
+                    val decreasedProgress = state.levelProgress - LEVEL_PROGRESS_DECREASE_PER_TICK
+                    state.copy(
+                        levelProgress = if (decreasedProgress < 0f) 0f else decreasedProgress
+                    )
+                }
+            }
+        }
     }
 
     private fun getInitialGameState(): GameState {
