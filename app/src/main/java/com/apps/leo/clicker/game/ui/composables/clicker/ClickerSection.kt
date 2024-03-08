@@ -29,7 +29,8 @@ fun ClickerSection(
     boosts: List<GameUiState.Boost>,
     statistics: GameUiState.Statistics,
     onBoostClicked: () -> Unit,
-    onClickerClicked: (coordinates: Offset) -> Unit,
+    onClickerClicked: () -> Unit,
+    onClickerPositioned: (centerCoordinates: Offset) -> Unit,
     incomeSideEffects: Flow<GameSideEffects.ShowIncome>
 ) {
     Box(
@@ -48,6 +49,7 @@ fun ClickerSection(
         )
         Clicker(
             onClickerClicked = onClickerClicked,
+            onClickerPositioned = onClickerPositioned,
             modifier = Modifier.align(
                 BiasAlignment(0f, 0.5f)
             )

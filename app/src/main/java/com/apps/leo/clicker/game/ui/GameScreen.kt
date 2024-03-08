@@ -62,7 +62,8 @@ private fun GameScreen(
             statistics = state.statistics,
             incomeSideEffects = sideEffects.filterIsInstance<GameSideEffects.ShowIncome>(),
             onBoostClicked = {},
-            onClickerClicked = { onAction(GameAction.OnClickerClicked(it)) }
+            onClickerPositioned = { onAction(GameAction.OnClickerPositioned(it)) },
+            onClickerClicked = { onAction(GameAction.OnClickerClicked) }
         )
         UpgradeButtonsSection(
             upgrades = state.upgradeButtons,

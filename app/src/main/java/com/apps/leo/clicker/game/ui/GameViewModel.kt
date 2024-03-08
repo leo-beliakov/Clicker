@@ -1,6 +1,5 @@
 package com.apps.leo.clicker.game.ui
 
-import android.util.Log
 import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -50,6 +49,8 @@ class GameViewModel @Inject constructor(
 
     private val _sideEffects = MutableSharedFlow<GameSideEffects>(replay = 1)
     val sideEffects = _sideEffects.asSharedFlow()
+
+    private var clickerPosition = Offset.Zero
 
     init {
         _state.onEach { gameState ->
@@ -135,23 +136,23 @@ class GameViewModel @Inject constructor(
     fun onAction(action: GameAction) {
         when (action) {
             is GameAction.OnBoostClicked -> {}
-
-            is GameAction.OnClickerClicked -> onClickerClicked(action.coordinates)
-
+            is GameAction.OnClickerPositioned -> {
+                clickerPosition = action.centerCoordinates
+            }
             is GameAction.OnUpgradeButtonClicked -> onUpgradeButtonClicked(action.upgradeButtonState)
 
+            GameAction.OnClickerClicked -> onClickerClicked()
             GameAction.OnCustomizeClicked -> {}
             GameAction.OnSettingsClicked -> {}
             GameAction.OnStatsClicked -> {}
         }
     }
 
-    private fun onClickerClicked(coordinates: Offset) {
+    private fun onClickerClicked() {
         viewModelScope.launch {
-            Log.d("MyTag", "emit $coordinates")
             _sideEffects.emit(
                 GameSideEffects.ShowIncome(
-                    coordinates = coordinates,
+                    coordinates = clickerPosition,
                     incomeText = formatAmountOfMoney(_state.value.clickIncome)
                 )
             )

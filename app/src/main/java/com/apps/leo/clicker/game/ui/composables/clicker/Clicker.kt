@@ -22,11 +22,11 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun Clicker(
-    onClickerClicked: (coordinates: Offset) -> Unit,
+    onClickerPositioned: (centerCoordinates: Offset) -> Unit,
+    onClickerClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val scale = remember { Animatable(initialValue = 1f) }
-    var clickerCenterOffset = remember { Offset.Zero }
 
     val animationSpec = FloatSpringSpec(0.8f, 2000f) //todo constants + expiriment
     val scope = rememberCoroutineScope()
@@ -41,9 +41,11 @@ fun Clicker(
                     coordinates.size.width / 2f,
                     coordinates.size.height / 2f
                 )
-                clickerCenterOffset = coordinates
+                val centerCoordinates = coordinates
                     .positionInParent()
                     .plus(offsetToCenter)
+
+                onClickerPositioned(centerCoordinates)
             }
             .scale(scale.value)
             .clickable(
@@ -58,7 +60,7 @@ fun Clicker(
                         scale.animateTo(1f, animationSpec)
                     }
 
-                    onClickerClicked(clickerCenterOffset)
+                    onClickerClicked()
                 }
             )
     ) {
