@@ -1,8 +1,10 @@
 package com.apps.leo.clicker.game.ui.composables.clicker
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.AnimationVector2D
+import androidx.compose.animation.core.AnimationVector3D
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.TwoWayConverter
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.material3.Text
@@ -27,9 +29,19 @@ import kotlin.random.Random
 data class IncomeAnimatorInfo(
     val id: UUID,
     val initialCoordinates: Offset,
-    val animatedOffset: Animatable<Float, AnimationVector2D>,
+    val animatedParams: Animatable<Float, AnimationVector3D>,
     val incomeText: String
 )
+
+private const val ANIMATION_START_VALUE = 0f
+private const val ANIMATION_TARGET_VALUE = 1f
+
+private const val ANIMATION_ANGLE_MIN = 70
+private const val ANIMATION_ANGLE_MAX = 110
+private const val ANIMATION_PROGRESS_ALPHA_THRESHOLD = 800
+private const val ANIMATION_DISTANCE = 450f //todo should depend on the available space
+private const val ANIMATION_DURATION = 800
+
 
 @Composable
 fun IncomeIdicationArea(
@@ -40,15 +52,8 @@ fun IncomeIdicationArea(
     val textMeasurer = rememberTextMeasurer()
     val localDensity = LocalDensity.current
 
-    //todo alpha and timt change at the end
-    //todo set angle
-    //todo set random start position
-    //todo think about the animation speed / type / time
-
     Box(modifier = modifier) {
         startedAnim.forEach { animatorInfo ->
-            val measureResult = textMeasurer.measure(animatorInfo.incomeText)
-
             Text(
                 text = animatorInfo.incomeText,
                 modifier = Modifier
@@ -57,11 +62,12 @@ fun IncomeIdicationArea(
                         y = with(localDensity) { animatorInfo.initialCoordinates.y.toDp() }
                     )
                     .graphicsLayer {
-                        val progress = animatorInfo.animatedOffset.value
-                        val offset =
-                            animatorInfo.animatedOffset.typeConverter.convertToVector(progress)
-                        translationX = offset.v1
-                        translationY = -offset.v2
+                        val progress = animatorInfo.animatedParams.value
+                        val animatedParams =
+                            animatorInfo.animatedParams.typeConverter.convertToVector(progress)
+                        translationX = animatedParams.v1
+                        translationY = -animatedParams.v2
+                        alpha = animatedParams.v3
                     }
             )
         }
@@ -79,8 +85,8 @@ fun IncomeIdicationArea(
                         )
                     )
 
-                val distance = 400f //todo should depend on the available space
-                val angle = Random.nextInt(from = 70, until = 110)
+                val distance = ANIMATION_DISTANCE
+                val angle = Random.nextInt(from = ANIMATION_ANGLE_MIN, until = ANIMATION_ANGLE_MAX)
                 val angleRad = (angle / 360f) * 2 * PI
                 val endCoordinatesOffsetX = distance * cos(angleRad).toFloat()
                 val endCoordinatesOffsetY = distance * sin(angleRad).toFloat()
@@ -88,13 +94,17 @@ fun IncomeIdicationArea(
                 val animatorInfo = IncomeAnimatorInfo(
                     id = UUID.randomUUID(),
                     initialCoordinates = textCoordinates,
-                    animatedOffset = Animatable(
-                        initialValue = 0f,
+                    animatedParams = Animatable(
+                        initialValue = ANIMATION_START_VALUE,
                         typeConverter = TwoWayConverter(
                             convertToVector = { progress ->
-                                AnimationVector2D(
-                                    endCoordinatesOffsetX * progress,
-                                    endCoordinatesOffsetY * progress
+                                AnimationVector3D(
+                                    v1 = endCoordinatesOffsetX * progress, //x offset
+                                    v2 = endCoordinatesOffsetY * progress, //y offset
+                                    v3 = when { //alpha
+                                        progress < ANIMATION_PROGRESS_ALPHA_THRESHOLD -> 1f
+                                        else -> ANIMATION_TARGET_VALUE - (progress - ANIMATION_PROGRESS_ALPHA_THRESHOLD) / (ANIMATION_TARGET_VALUE - ANIMATION_PROGRESS_ALPHA_THRESHOLD)
+                                    }
                                 )
                             },
                             convertFromVector = { vector ->
@@ -106,7 +116,13 @@ fun IncomeIdicationArea(
                 )
 
                 startedAnim.add(animatorInfo)
-                animatorInfo.animatedOffset.animateTo(1f)
+                animatorInfo.animatedParams.animateTo(
+                    ANIMATION_TARGET_VALUE,
+                    animationSpec = tween(
+                        durationMillis = ANIMATION_DURATION,
+                        easing = LinearOutSlowInEasing
+                    )
+                )
                 startedAnim.remove(animatorInfo)
             }
         }
