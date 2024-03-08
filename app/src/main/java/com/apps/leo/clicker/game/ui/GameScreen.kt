@@ -1,7 +1,12 @@
 package com.apps.leo.clicker.game.ui
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsBottomHeight
+import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -39,6 +44,9 @@ private fun GameScreen(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
+        Spacer(
+            modifier = Modifier.windowInsetsTopHeight(WindowInsets.systemBars)
+        )
         LevelSection(
             state.levelText,
             state.levelPercentage,
@@ -52,6 +60,9 @@ private fun GameScreen(
         UpgradeButtonsSection(
             upgrades = state.upgradeButtons,
             onButtonClicked = { onAction(GameAction.OnUpgradeButtonClicked(it)) }
+        )
+        Spacer(
+            modifier = Modifier.windowInsetsBottomHeight(WindowInsets.systemBars)
         )
     }
 }
