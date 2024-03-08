@@ -39,7 +39,7 @@ private const val ANIMATION_TARGET_VALUE = 1f
 
 private const val ANIMATION_ANGLE_MIN = 70
 private const val ANIMATION_ANGLE_MAX = 110
-private const val ANIMATION_PROGRESS_ALPHA_THRESHOLD = 800
+private const val ANIMATION_PROGRESS_ALPHA_THRESHOLD = 0.8f
 private const val ANIMATION_DISTANCE = 450f //todo should depend on the available space
 private const val ANIMATION_DURATION = 800
 
