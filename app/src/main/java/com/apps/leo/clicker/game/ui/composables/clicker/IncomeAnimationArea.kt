@@ -29,6 +29,7 @@ import kotlin.random.Random
 data class IncomeAnimatorInfo(
     val id: UUID,
     val initialCoordinates: Offset,
+    val angle: Float,
     val animatedParams: Animatable<Float, AnimationVector3D>,
     val incomeText: String
 )
@@ -41,7 +42,6 @@ private const val ANIMATION_ANGLE_MAX = 110
 private const val ANIMATION_PROGRESS_ALPHA_THRESHOLD = 800
 private const val ANIMATION_DISTANCE = 450f //todo should depend on the available space
 private const val ANIMATION_DURATION = 800
-
 
 @Composable
 fun IncomeIdicationArea(
@@ -68,6 +68,7 @@ fun IncomeIdicationArea(
                         translationX = animatedParams.v1
                         translationY = -animatedParams.v2
                         alpha = animatedParams.v3
+                        rotationZ = animatorInfo.angle
                     }
             )
         }
@@ -94,6 +95,7 @@ fun IncomeIdicationArea(
                 val animatorInfo = IncomeAnimatorInfo(
                     id = UUID.randomUUID(),
                     initialCoordinates = textCoordinates,
+                    angle = 90f - angle,
                     animatedParams = Animatable(
                         initialValue = ANIMATION_START_VALUE,
                         typeConverter = TwoWayConverter(

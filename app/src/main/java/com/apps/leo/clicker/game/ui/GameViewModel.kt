@@ -155,7 +155,7 @@ class GameViewModel @Inject constructor(
             _sideEffects.emit(
                 GameSideEffects.ShowIncome(
                     coordinates = clickerPosition.copy(x = clickerPosition.x + randomOffsetX),
-                    incomeText = formatAmountOfMoney(_state.value.clickIncome)
+                    incomeText = "+${formatAmountOfMoney(_state.value.clickIncome)}"
                 )
             )
         }
