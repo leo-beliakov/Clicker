@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.math.min
+import kotlin.random.Random
 
 private const val NEW_LEVEL_PROGRESS_EXCEED_THRESHOLD = 0.03f
 private const val LEVEL_PROGRESS_PER_CLICK = 0.07f
@@ -150,9 +151,10 @@ class GameViewModel @Inject constructor(
 
     private fun onClickerClicked() {
         viewModelScope.launch {
+            val randomOffsetX = Random.nextInt(-100, 100)
             _sideEffects.emit(
                 GameSideEffects.ShowIncome(
-                    coordinates = clickerPosition,
+                    coordinates = clickerPosition.copy(x = clickerPosition.x + randomOffsetX),
                     incomeText = formatAmountOfMoney(_state.value.clickIncome)
                 )
             )
