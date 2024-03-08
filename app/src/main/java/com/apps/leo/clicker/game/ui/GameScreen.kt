@@ -15,20 +15,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.apps.leo.clicker.game.ui.composables.ClickerSection
 import com.apps.leo.clicker.game.ui.composables.LevelSection
 import com.apps.leo.clicker.game.ui.composables.UpgradeButtonsSection
+import com.apps.leo.clicker.game.ui.composables.clicker.ClickerSection
 import com.apps.leo.clicker.game.ui.model.GameAction
+import com.apps.leo.clicker.game.ui.model.GameSideEffects
 import com.apps.leo.clicker.game.ui.model.GameUiState
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.filterIsInstance
 
 @Composable
 fun GameScreen(
     viewModel: GameViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val sideEffects = viewModel.sideEffects
 
     GameScreen(
         state = state,
+        sideEffects = sideEffects,
         onAction = viewModel::onAction
     )
 }
@@ -36,7 +41,8 @@ fun GameScreen(
 @Composable
 private fun GameScreen(
     state: GameUiState,
-    onAction: (GameAction) -> Unit
+    sideEffects: SharedFlow<GameSideEffects>,
+    onAction: (GameAction) -> Unit,
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -52,10 +58,11 @@ private fun GameScreen(
             state.levelPercentage,
         )
         ClickerSection(
-            state.boosts,
-            state.statistics,
+            boosts = state.boosts,
+            statistics = state.statistics,
+            incomeSideEffects = sideEffects.filterIsInstance<GameSideEffects.ShowIncome>(),
             onBoostClicked = {},
-            onClickerClicked = { onAction(GameAction.OnClickerClicked) }
+            onClickerClicked = { onAction(GameAction.OnClickerClicked(it)) }
         )
         UpgradeButtonsSection(
             upgrades = state.upgradeButtons,

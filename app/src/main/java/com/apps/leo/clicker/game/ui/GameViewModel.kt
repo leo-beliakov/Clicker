@@ -1,6 +1,7 @@
 package com.apps.leo.clicker.game.ui
 
 import android.util.Log
+import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apps.leo.clicker.game.common.ui.formatAmountOfMoney
@@ -11,11 +12,14 @@ import com.apps.leo.clicker.game.domain.PASSIVE_INCOME_WORKERS_REQUIRED_FOR_UPGR
 import com.apps.leo.clicker.game.domain.model.UpgradeType
 import com.apps.leo.clicker.game.ui.mapper.GameStateMapper
 import com.apps.leo.clicker.game.ui.model.GameAction
+import com.apps.leo.clicker.game.ui.model.GameSideEffects
 import com.apps.leo.clicker.game.ui.model.GameState
 import com.apps.leo.clicker.game.ui.model.GameUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -39,17 +43,16 @@ class GameViewModel @Inject constructor(
     private val mapper: GameStateMapper,
 ) : ViewModel() {
 
-    private val _state =
-        MutableStateFlow(getInitialGameState()) //todo think about separation into upgrades / stats / etc
+    //todo think about separation into upgrades / stats / etc
+    private val _state = MutableStateFlow(getInitialGameState())
     private val _stateUi = MutableStateFlow(getInitialUIGameState())
     val state = _stateUi.asStateFlow()
 
+    private val _sideEffects = MutableSharedFlow<GameSideEffects>(replay = 1)
+    val sideEffects = _sideEffects.asSharedFlow()
+
     init {
         _state.onEach { gameState ->
-            Log.d(
-                "MyTag",
-                "workers = ${gameState.passiveIncome.workers.map { "lvl = ${it.level}" }}"
-            )
             _stateUi.update { uiState ->
                 uiState.copy(
                     levelText = "Level ${gameState.currentLevel}",
@@ -131,9 +134,9 @@ class GameViewModel @Inject constructor(
 
     fun onAction(action: GameAction) {
         when (action) {
-            GameAction.OnClickerClicked -> onClickerClicked()
-
             is GameAction.OnBoostClicked -> {}
+
+            is GameAction.OnClickerClicked -> onClickerClicked(action.coordinates)
 
             is GameAction.OnUpgradeButtonClicked -> onUpgradeButtonClicked(action.upgradeButtonState)
 
@@ -143,7 +146,16 @@ class GameViewModel @Inject constructor(
         }
     }
 
-    private fun onClickerClicked() {
+    private fun onClickerClicked(coordinates: Offset) {
+        viewModelScope.launch {
+            Log.d("MyTag", "emit $coordinates")
+            _sideEffects.emit(
+                GameSideEffects.ShowIncome(
+                    coordinates = coordinates,
+                    incomeText = formatAmountOfMoney(_state.value.clickIncome)
+                )
+            )
+        }
         _state.update {
             val levelProgress = it.levelProgress + LEVEL_PROGRESS_PER_CLICK
             val isLevelCompleted = (levelProgress) >= (1f + NEW_LEVEL_PROGRESS_EXCEED_THRESHOLD)
