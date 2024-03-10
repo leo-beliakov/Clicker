@@ -27,7 +27,7 @@ import kotlin.math.sin
 import kotlin.random.Random
 
 data class IncomeAnimatorInfo(
-    val id: UUID,
+    val id: UUID = UUID.randomUUID(),
     val initialCoordinates: Offset,
     val angle: Float,
     val animatedParams: Animatable<Float, AnimationVector3D>,
@@ -93,7 +93,6 @@ fun IncomeIdicationArea(
                 val endCoordinatesOffsetY = distance * sin(angleRad).toFloat()
 
                 val animatorInfo = IncomeAnimatorInfo(
-                    id = UUID.randomUUID(),
                     initialCoordinates = textCoordinates,
                     angle = 90f - angle,
                     animatedParams = Animatable(

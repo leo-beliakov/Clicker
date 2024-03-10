@@ -5,8 +5,6 @@ import androidx.compose.animation.core.FloatSpringSpec
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -17,13 +15,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.IntSize
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 @Composable
 fun Clicker(
-    onClickerPositioned: (centerCoordinates: Offset) -> Unit,
+    onClickerPositioned: (size: IntSize, centerCoordinates: Offset) -> Unit,
     onClickerClicked: () -> Unit,
+    color: Color = Color.Red,
     modifier: Modifier = Modifier
 ) {
     val scale = remember { Animatable(initialValue = 1f) }
@@ -34,8 +34,6 @@ fun Clicker(
 
     Canvas(
         modifier = modifier
-            .fillMaxWidth(0.6f)
-            .aspectRatio(1f)
             .onGloballyPositioned { coordinates ->
                 val offsetToCenter = Offset(
                     coordinates.size.width / 2f,
@@ -45,7 +43,7 @@ fun Clicker(
                     .positionInParent()
                     .plus(offsetToCenter)
 
-                onClickerPositioned(centerCoordinates)
+                onClickerPositioned(coordinates.size, centerCoordinates)
             }
             .scale(scale.value)
             .clickable(
@@ -65,7 +63,7 @@ fun Clicker(
             )
     ) {
         drawCircle(
-            color = Color.Red
+            color = color
         )
     }
 }

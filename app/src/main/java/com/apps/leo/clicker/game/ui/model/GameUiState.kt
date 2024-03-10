@@ -10,10 +10,12 @@ const val START_LEVEL = 1
 data class GameState(
     val totalBalance: Long,
     val clickIncome: Long,
+    val extraClickerIncome: Long,
     val passiveIncome: PassiveIncome,
     val currentLevel: Int,
     val levelProgress: Float,
     val upgrades: List<Upgrade>,
+    val extraClickers: List<ExtraClickerInfo>,
 ) {
     data class PassiveIncome(
         val workers: List<Worker> = emptyList(),
@@ -31,6 +33,7 @@ data class GameUiState(
     val levelPercentage: Float,
     val boosts: List<Boost> = emptyList(),
     val statistics: Statistics = Statistics(),
+    val extraClickers: List<ExtraClickerInfo> = emptyList(),
     val upgradeButtons: List<UpgradeButtonState> = emptyList()
 ) {
     data class Boost(
