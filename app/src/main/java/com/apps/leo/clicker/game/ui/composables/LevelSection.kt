@@ -43,18 +43,15 @@ fun LevelSection(
     levelPercentage: Float,
     onLevelUpgradeAnimationFinished: () -> Unit
 ) {
-    val border = 4.dp //todo to constants
-    val textMeasurer = rememberTextMeasurer()
-
     val tweenSpec = tween<Float>(durationMillis = 250, easing = LinearEasing)
     val animatedScale = remember {
         Animatable(initialValue = 1f)
     }
-    val animatedLevel = remember {
+    val animatedPercentage = remember {
         Animatable(initialValue = 0f)
     }
     val animatedColor by animateColorAsState(
-        targetValue = lerp(Color.Red, Color.Green, animatedLevel.value)
+        targetValue = lerp(Color.Red, Color.Green, animatedPercentage.value)
     )
 
     LaunchedEffect(levelPercentage) {
@@ -66,21 +63,39 @@ fun LevelSection(
                 }
             }
             launch {
-                animatedLevel.animateTo(1f)
-                animatedLevel.animateTo(0f, tween(2500))
+                animatedPercentage.animateTo(1f)
+                animatedPercentage.animateTo(0f, tween(2500))
                 onLevelUpgradeAnimationFinished()
             }
         } else {
-            animatedLevel.animateTo(levelPercentage)
+            animatedPercentage.animateTo(levelPercentage)
         }
     }
+
+    LevelSection(
+        levelText = levelText,
+        levelPercentage = animatedPercentage.value,
+        levelColor = animatedColor,
+        scale = animatedScale.value
+    )
+}
+
+@Composable
+private fun LevelSection(
+    levelText: String,
+    levelPercentage: Float,
+    levelColor: Color,
+    scale: Float
+) {
+    val border = 4.dp //todo to constants
+    val textMeasurer = rememberTextMeasurer()
 
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 12.dp)
-            .scale(animatedScale.value)
+            .scale(scale)
     ) {
         Spacer(
             modifier = Modifier
@@ -96,13 +111,13 @@ fun LevelSection(
                         topLeft = Offset(halfBorderWidth, halfBorderWidth),
                         size = Size(size.width - borderWidth, size.height - borderWidth),
                     )
-                    if (animatedLevel.value > 0f) {
+                    if (levelPercentage > 0f) {
                         drawRect(
-                            color = animatedColor,
+                            color = levelColor,
                             style = Fill,
                             topLeft = Offset(halfBorderWidth, halfBorderWidth),
                             size = Size(
-                                size.width * animatedLevel.value - borderWidth,
+                                size.width * levelPercentage - borderWidth,
                                 size.height - borderWidth
                             ),
                         )
@@ -146,7 +161,8 @@ private fun LevelSectionStartPreview() {
         LevelSection(
             levelText = "Level 1",
             levelPercentage = 0.05f,
-            onLevelUpgradeAnimationFinished = {}
+            levelColor = Color.Red,
+            scale = 1f
         )
     }
 }
@@ -158,7 +174,8 @@ private fun LevelSectionMiddlePreview() {
         LevelSection(
             levelText = "Level 1",
             levelPercentage = 0.5f,
-            onLevelUpgradeAnimationFinished = {}
+            levelColor = Color.Yellow,
+            scale = 1f
         )
     }
 }
@@ -170,7 +187,8 @@ private fun LevelSectionFullPreview() {
         LevelSection(
             levelText = "Level 1",
             levelPercentage = 1f,
-            onLevelUpgradeAnimationFinished = {}
+            levelColor = Color.Green,
+            scale = 1f
         )
     }
 }
