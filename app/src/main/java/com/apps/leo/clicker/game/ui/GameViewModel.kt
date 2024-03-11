@@ -34,6 +34,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
+import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
 
@@ -169,11 +170,15 @@ class GameViewModel @Inject constructor(
         viewModelScope.launch {
             while (true) {
                 delay(LEVEL_PROGRESS_DECREASE_TICK)
-                _state.update { state ->
-                    val decreasedProgress = state.levelProgress - LEVEL_PROGRESS_DECREASE_PER_TICK
-                    state.copy(
-                        levelProgress = if (decreasedProgress < 0f) 0f else decreasedProgress
-                    )
+                if (!_state.value.isLevelUpgradeInProgress) {
+                    _state.update { state ->
+                        state.copy(
+                            levelProgress = max(
+                                0f,
+                                state.levelProgress - LEVEL_PROGRESS_DECREASE_PER_TICK
+                            )
+                        )
+                    }
                 }
             }
         }
@@ -204,7 +209,8 @@ class GameViewModel @Inject constructor(
             levelProgress = 0f,
             currentLevel = 1,
             upgrades = getInitialUpgrades(),
-            extraClickers = emptyList()
+            extraClickers = emptyList(),
+            isLevelUpgradeInProgress = false
         )
     }
 
@@ -246,6 +252,14 @@ class GameViewModel @Inject constructor(
             GameAction.OnCustomizeClicked -> {}
             GameAction.OnSettingsClicked -> {}
             GameAction.OnStatsClicked -> {}
+            GameAction.onLevelUpgradeAnimationFinished -> {
+                _state.update {
+                    it.copy(
+                        levelProgress = 0f,
+                        isLevelUpgradeInProgress = false
+                    )
+                }
+            }
         }
     }
 
@@ -278,16 +292,18 @@ class GameViewModel @Inject constructor(
         )
 
         _state.update {
-            val levelProgress = it.levelProgress + LEVEL_PROGRESS_PER_CLICK
+            val levelProgress =
+                if (_state.value.isLevelUpgradeInProgress) it.levelProgress else it.levelProgress + LEVEL_PROGRESS_PER_CLICK
             val isLevelCompleted = (levelProgress) >= (1f + NEW_LEVEL_PROGRESS_EXCEED_THRESHOLD)
-            val levelProgressNormalized = if (isLevelCompleted) 0f else min(levelProgress, 1f)
+            val levelProgressNormalized = min(levelProgress, 1f)
             val newLevel = if (isLevelCompleted) it.currentLevel + 1 else it.currentLevel
 
             it.copy(
                 totalBalance = it.totalBalance + it.clickIncome,
                 currentLevel = newLevel,
                 extraClickerIncome = newLevel * 300L, //todo economy??
-                levelProgress = levelProgressNormalized
+                levelProgress = levelProgressNormalized,
+                isLevelUpgradeInProgress = if (isLevelCompleted) true else it.isLevelUpgradeInProgress
             )
         }
     }

@@ -5,6 +5,7 @@ import androidx.compose.ui.unit.IntSize
 
 sealed interface GameAction {
     object OnClickerClicked : GameAction
+    object onLevelUpgradeAnimationFinished : GameAction
     object OnSettingsClicked : GameAction
     object OnStatsClicked : GameAction
     object OnCustomizeClicked : GameAction

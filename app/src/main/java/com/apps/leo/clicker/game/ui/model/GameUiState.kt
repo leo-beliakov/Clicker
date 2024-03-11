@@ -16,6 +16,7 @@ data class GameState(
     val levelProgress: Float,
     val upgrades: List<Upgrade>,
     val extraClickers: List<ExtraClickerInfo>,
+    val isLevelUpgradeInProgress: Boolean
 ) {
     data class PassiveIncome(
         val workers: List<Worker> = emptyList(),

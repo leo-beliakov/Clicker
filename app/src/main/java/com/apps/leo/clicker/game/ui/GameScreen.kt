@@ -54,8 +54,9 @@ private fun GameScreen(
             modifier = Modifier.windowInsetsTopHeight(WindowInsets.systemBars)
         )
         LevelSection(
-            state.levelText,
-            state.levelPercentage,
+            levelText = state.levelText,
+            levelPercentage = state.levelPercentage,
+            onLevelUpgradeAnimationFinished = { onAction(GameAction.onLevelUpgradeAnimationFinished) }
         )
         ClickerSection(
             boosts = state.boosts,
