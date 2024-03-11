@@ -125,13 +125,10 @@ class GameViewModel @Inject constructor(
                 launch {
                     delay(EXTRA_CLICKER_LIFESPAN)
                     _state.update {
-                        val updatedClickerInfo = extraClickerInfo.copy(
-                            remainedClicks = extraClickerInfo.remainedClicks - 1
-                        )
                         it.copy(
                             extraClickers = it.extraClickers.swap(
                                 extraClickerInfo,
-                                updatedClickerInfo
+                                extraClickerInfo.reduceClicks()
                             )
                         )
                     }
@@ -258,85 +255,71 @@ class GameViewModel @Inject constructor(
         }
     }
 
-    private fun onExtraClickerClicked(info: ExtraClickerInfo) { //todo подумать над унификацией с onClickerClicked
-        viewModelScope.launch {
-            val clickerRadius = info.radius
-            val clickerIncomeIndicationAreaRadius = clickerRadius * 0.3f
-            val randomOffsetX = Random.nextFloat(
-                -clickerIncomeIndicationAreaRadius,
-                clickerIncomeIndicationAreaRadius
-            ) //todo
+    private fun onExtraClickerClicked(info: ExtraClickerInfo) {
+        showClickIndication(
+            clickerRadius = info.radius,
+            clickerCenter = info.centerCoordinates,
+            incomePerClick = _state.value.extraClickerIncome
+        )
 
-            _sideEffects.emit(
-                GameSideEffects.ShowIncome(
-                    coordinates = info.centerCoordinates.copy(x = info.centerCoordinates.x + randomOffsetX),
-                    incomeText = "+${formatAmountOfMoney(_state.value.clickIncome)}"
-                )
-            )
-        }
         _state.update {
-//            val levelProgress = it.levelProgress + LEVEL_PROGRESS_PER_CLICK
-//            val isLevelCompleted = (levelProgress) >= (1f + NEW_LEVEL_PROGRESS_EXCEED_THRESHOLD)
-//            val levelProcessNormalized = if (isLevelCompleted) 0f else min(levelProgress, 1f)
-//            val newLevel = if (isLevelCompleted) it.currentLevel + 1 else it.currentLevel
-
-            val updatedClickerInfo = info.copy(
-                remainedClicks = info.remainedClicks - 1
-            )
-
             it.copy(
-                totalBalance = it.totalBalance + it.clickIncome,
-                extraClickers = it.extraClickers.swap(info, updatedClickerInfo)
-//                currentLevel = newLevel,
-//                levelProgress = levelProcessNormalized
+                totalBalance = it.totalBalance + it.extraClickerIncome,
+                extraClickers = it.extraClickers.swap(info, info.reduceClicks())
             )
         }
     }
 
     private fun onClickerClicked() {
-        viewModelScope.launch {
-            val clickerRadius = clickerSize.width / 2f
-            val clickerIncomeIndicationAreaRadius = clickerRadius * 0.3f
-            val randomOffsetX = Random.nextFloat(
-                -clickerIncomeIndicationAreaRadius,
-                clickerIncomeIndicationAreaRadius
-            ) //todo
+        showClickIndication(
+            clickerRadius = clickerSize.width / 2f,
+            clickerCenter = clickerPosition,
+            incomePerClick = _state.value.clickIncome
+        )
 
-            _sideEffects.emit(
-                GameSideEffects.ShowIncome(
-                    coordinates = clickerPosition.copy(x = clickerPosition.x + randomOffsetX),
-                    incomeText = "+${formatAmountOfMoney(_state.value.clickIncome)}"
-                )
-            )
-        }
         _state.update {
             val levelProgress = it.levelProgress + LEVEL_PROGRESS_PER_CLICK
             val isLevelCompleted = (levelProgress) >= (1f + NEW_LEVEL_PROGRESS_EXCEED_THRESHOLD)
-            val levelProcessNormalized = if (isLevelCompleted) 0f else min(levelProgress, 1f)
+            val levelProgressNormalized = if (isLevelCompleted) 0f else min(levelProgress, 1f)
             val newLevel = if (isLevelCompleted) it.currentLevel + 1 else it.currentLevel
 
             it.copy(
                 totalBalance = it.totalBalance + it.clickIncome,
                 currentLevel = newLevel,
-                extraClickerIncome = newLevel * 300L, //todo exonomy??
-                levelProgress = levelProcessNormalized
+                extraClickerIncome = newLevel * 300L, //todo economy??
+                levelProgress = levelProgressNormalized
+            )
+        }
+    }
+
+    private fun showClickIndication(
+        clickerRadius: Float,
+        clickerCenter: Offset,
+        incomePerClick: Long
+    ) {
+        viewModelScope.launch {
+            val clickerIncomeIndicationAreaRadius = clickerRadius * 0.3f
+            val randomOffsetX = Random.nextFloat(
+                from = -clickerIncomeIndicationAreaRadius,
+                until = clickerIncomeIndicationAreaRadius
+            )
+
+            _sideEffects.emit(
+                GameSideEffects.ShowIncome(
+                    coordinates = clickerCenter.copy(x = clickerCenter.x + randomOffsetX),
+                    incomeText = "+${formatAmountOfMoney(incomePerClick)}"
+                )
             )
         }
     }
 
     private fun onUpgradeButtonClicked(buttonState: GameUiState.UpgradeButtonState) {
         _state.update {
-            val indexOfUpgrade = it.upgrades.indexOfFirst { it.type == buttonState.type }
-            val upgrade = it.upgrades[indexOfUpgrade]
-            val upgradeUpdatedLevel = upgrade.level + 1
+            val upgrade = it.upgrades.first { it.type == buttonState.type }
             val updatedUpgrade = upgrade.copy(
                 level = upgrade.level + 1,
-                price = getUpgradePrice(upgrade.type, upgradeUpdatedLevel)
+                price = getUpgradePrice(upgrade.type, upgrade.level + 1)
             )
-
-            val updatedUpgradesList = it.upgrades.toMutableList() //todo move to utils?
-            updatedUpgradesList.removeAt(indexOfUpgrade)
-            updatedUpgradesList.add(indexOfUpgrade, updatedUpgrade)
 
             //apply effects of the upgrade
             val updatedState = when (upgrade.type) {
@@ -402,7 +385,7 @@ class GameViewModel @Inject constructor(
 
             updatedState.copy(
                 totalBalance = it.totalBalance - buttonState.price,
-                upgrades = updatedUpgradesList.toList()
+                upgrades = it.upgrades.swap(upgrade, updatedUpgrade)
             )
         }
     }

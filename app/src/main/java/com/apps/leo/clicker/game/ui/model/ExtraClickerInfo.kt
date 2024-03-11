@@ -9,4 +9,8 @@ data class ExtraClickerInfo(
     val radius: Float,
     val centerCoordinates: Offset,
     val topLeftCoordinates: Offset
-)
+) {
+    fun reduceClicks(): ExtraClickerInfo {
+        return this.copy(remainedClicks = remainedClicks - 1)
+    }
+}
