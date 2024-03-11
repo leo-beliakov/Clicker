@@ -1,13 +1,19 @@
 package com.apps.leo.clicker.game.ui.composables.clicker
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -24,7 +30,8 @@ fun ClickerSection(
     statistics: GameUiState.Statistics,
     onBoostClicked: () -> Unit,
     onClickerClicked: () -> Unit,
-    onRandomClickerClicked: (ExtraClickerInfo) -> Unit,
+    onExtraClickerClicked: (ExtraClickerInfo) -> Unit,
+    onExtraClickerDisappeared: (ExtraClickerInfo) -> Unit,
     onClickerAreaPositioned: (size: IntSize) -> Unit,
     onClickerPositioned: (size: IntSize, centerCoordinates: Offset) -> Unit,
     incomeSideEffects: Flow<GameSideEffects.ShowIncome>,
@@ -53,9 +60,10 @@ fun ClickerSection(
                 .fillMaxWidth(0.6f)
                 .aspectRatio(1f)
         )
-        RandomClickersSection(
+        ExtraClickersSection(
             extraClickers = extraClickers,
-            onRandomClickerClicked = onRandomClickerClicked,
+            onExtraClickerClicked = onExtraClickerClicked,
+            onExtraClickerDisappeared = onExtraClickerDisappeared,
             modifier = Modifier.fillMaxWidth()
         )
         IncomeIdicationArea(
@@ -66,17 +74,30 @@ fun ClickerSection(
 }
 
 @Composable
-fun RandomClickersSection(
+fun ExtraClickersSection(
     extraClickers: List<ExtraClickerInfo>,
-    onRandomClickerClicked: (ExtraClickerInfo) -> Unit,
+    onExtraClickerClicked: (ExtraClickerInfo) -> Unit,
+    onExtraClickerDisappeared: (ExtraClickerInfo) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val localDensity = LocalDensity.current
 
     Box(modifier = modifier) {
         extraClickers.forEach { clickerInfo ->
+            val scaleAndAlpha = remember { Animatable(initialValue = 1f) }
+
+            LaunchedEffect(clickerInfo.remainedClicks) {
+                if (clickerInfo.remainedClicks == 0) {
+                    scaleAndAlpha.animateTo(
+                        targetValue = 0.1f,
+                        animationSpec = tween(200)
+                    )
+                    onExtraClickerDisappeared(clickerInfo)
+                }
+            }
+
             Clicker(
-                onClickerClicked = { onRandomClickerClicked(clickerInfo) },
+                onClickerClicked = { onExtraClickerClicked(clickerInfo) },
                 onClickerPositioned = { _, _ -> },
                 color = Color.Blue,
                 modifier = Modifier
@@ -86,6 +107,8 @@ fun RandomClickersSection(
                         x = with(localDensity) { clickerInfo.topLeftCoordinates.x.toDp() },
                         y = with(localDensity) { clickerInfo.topLeftCoordinates.y.toDp() }
                     )
+                    .scale(scaleAndAlpha.value)
+                    .alpha(scaleAndAlpha.value)
             )
         }
     }

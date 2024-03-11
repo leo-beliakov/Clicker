@@ -4,6 +4,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.apps.leo.clicker.game.common.collections.add
+import com.apps.leo.clicker.game.common.collections.remove
+import com.apps.leo.clicker.game.common.collections.swap
 import com.apps.leo.clicker.game.common.geometry.distance2D
 import com.apps.leo.clicker.game.common.random.nextFloat
 import com.apps.leo.clicker.game.common.random.nextOffset
@@ -40,6 +43,9 @@ private const val LEVEL_PROGRESS_DECREASE_TICK = 60L
 private const val LEVEL_PROGRESS_DECREASE_PER_TICK = 0.02f
 
 private const val PASSIVE_INCOME_TICK = 1000L
+
+private const val EXTRA_CLICKER_LIFESPAN = 4000L
+private const val EXTRA_CLICKER_SPAWN_DELAY = 3000L
 
 @HiltViewModel
 class GameViewModel @Inject constructor(
@@ -110,24 +116,23 @@ class GameViewModel @Inject constructor(
                 )
 
                 _state.update {
-                    val updatedExtraClickers = it.extraClickers.toMutableList()
-                    updatedExtraClickers.add(extraClickerInfo)
-
-                    it.copy(
-                        extraClickers = updatedExtraClickers.toList()
-                    )
+                    val updatedClickersList = it.extraClickers.add(extraClickerInfo)
+                    it.copy(extraClickers = updatedClickersList)
                 }
 
-                delay(2000) // delay between two extra clickers
+                delay(EXTRA_CLICKER_SPAWN_DELAY)
 
                 launch {
-                    delay(1500) //lifespan
+                    delay(EXTRA_CLICKER_LIFESPAN)
                     _state.update {
-                        val updatedExtraClickers = it.extraClickers.toMutableList()
-                        updatedExtraClickers.remove(extraClickerInfo)
-
+                        val updatedClickerInfo = extraClickerInfo.copy(
+                            remainedClicks = extraClickerInfo.remainedClicks - 1
+                        )
                         it.copy(
-                            extraClickers = updatedExtraClickers.toList()
+                            extraClickers = it.extraClickers.swap(
+                                extraClickerInfo,
+                                updatedClickerInfo
+                            )
                         )
                     }
                 }
@@ -236,12 +241,20 @@ class GameViewModel @Inject constructor(
 
             is GameAction.OnExtraClickerClicked -> onExtraClickerClicked(action.info)
 
+            is GameAction.OnExtraClickerDisappeared -> onExtraClickerDisappeared(action.info)
+
             is GameAction.OnUpgradeButtonClicked -> onUpgradeButtonClicked(action.upgradeButtonState)
 
             GameAction.OnClickerClicked -> onClickerClicked()
             GameAction.OnCustomizeClicked -> {}
             GameAction.OnSettingsClicked -> {}
             GameAction.OnStatsClicked -> {}
+        }
+    }
+
+    private fun onExtraClickerDisappeared(info: ExtraClickerInfo) {
+        _state.update {
+            it.copy(extraClickers = it.extraClickers.remove(info))
         }
     }
 
@@ -267,8 +280,13 @@ class GameViewModel @Inject constructor(
 //            val levelProcessNormalized = if (isLevelCompleted) 0f else min(levelProgress, 1f)
 //            val newLevel = if (isLevelCompleted) it.currentLevel + 1 else it.currentLevel
 
+            val updatedClickerInfo = info.copy(
+                remainedClicks = info.remainedClicks - 1
+            )
+
             it.copy(
                 totalBalance = it.totalBalance + it.clickIncome,
+                extraClickers = it.extraClickers.swap(info, updatedClickerInfo)
 //                currentLevel = newLevel,
 //                levelProgress = levelProcessNormalized
             )
@@ -330,13 +348,13 @@ class GameViewModel @Inject constructor(
                 }
 
                 UpgradeType.ADD_CURSOR -> {
-                    val updatedWorkersList = it.passiveIncome.workers.toMutableList()
-                    updatedWorkersList.add(GameState.PassiveIncome.Worker())
-                    updatedWorkersList.sortBy { it.level }
+                    val updatedWorkersList = it.passiveIncome.workers
+                        .add(GameState.PassiveIncome.Worker())
+                        .sortedBy { it.level }
 
                     it.copy(
                         passiveIncome = it.passiveIncome.copy(
-                            workers = updatedWorkersList.toList()
+                            workers = updatedWorkersList
                         )
                     )
                 }

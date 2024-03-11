@@ -29,4 +29,8 @@ sealed interface GameAction {
     data class OnExtraClickerClicked(
         val info: ExtraClickerInfo
     ) : GameAction
+
+    data class OnExtraClickerDisappeared(
+        val info: ExtraClickerInfo
+    ) : GameAction
 }

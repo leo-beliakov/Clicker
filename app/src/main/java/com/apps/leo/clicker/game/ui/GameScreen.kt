@@ -73,7 +73,8 @@ private fun GameScreen(
             },
             onClickerAreaPositioned = { onAction(GameAction.OnClickerAreaPositioned(it)) },
             onClickerClicked = { onAction(GameAction.OnClickerClicked) },
-            onRandomClickerClicked = { onAction(GameAction.OnExtraClickerClicked(it)) }
+            onExtraClickerClicked = { onAction(GameAction.OnExtraClickerClicked(it)) },
+            onExtraClickerDisappeared = { onAction(GameAction.OnExtraClickerDisappeared(it)) }
         )
         UpgradeButtonsSection(
             upgrades = state.upgradeButtons,
