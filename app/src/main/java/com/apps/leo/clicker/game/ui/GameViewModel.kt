@@ -14,6 +14,7 @@ import com.apps.leo.clicker.game.common.ui.formatAmountOfMoney
 import com.apps.leo.clicker.game.domain.CalculatePassiveIncomeUseCase
 import com.apps.leo.clicker.game.domain.GetInitialUpgradesUseCase
 import com.apps.leo.clicker.game.domain.GetUpgradePriceUseCase
+import com.apps.leo.clicker.game.domain.LevelManager
 import com.apps.leo.clicker.game.domain.PASSIVE_INCOME_WORKERS_REQUIRED_FOR_UPGRADE
 import com.apps.leo.clicker.game.domain.model.UpgradeType
 import com.apps.leo.clicker.game.ui.mapper.GameStateMapper
@@ -34,14 +35,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
-import kotlin.math.max
-import kotlin.math.min
 import kotlin.random.Random
-
-private const val NEW_LEVEL_PROGRESS_EXCEED_THRESHOLD = 0.03f
-private const val LEVEL_PROGRESS_PER_CLICK = 0.07f
-private const val LEVEL_PROGRESS_DECREASE_TICK = 60L
-private const val LEVEL_PROGRESS_DECREASE_PER_TICK = 0.02f
 
 private const val PASSIVE_INCOME_TICK = 1000L
 
@@ -50,6 +44,7 @@ private const val EXTRA_CLICKER_SPAWN_DELAY = 3000L
 
 @HiltViewModel
 class GameViewModel @Inject constructor(
+    private val levelManager: LevelManager,
     private val calculatePassiveIncome: CalculatePassiveIncomeUseCase,
     private val getInitialUpgrades: GetInitialUpgradesUseCase,
     private val getUpgradePrice: GetUpgradePriceUseCase,
@@ -69,11 +64,20 @@ class GameViewModel @Inject constructor(
     private var clickerAreaSize = IntSize.Zero
 
     init {
+        levelManager.level.onEach { levelState ->
+            _state.update {
+                it.copy(
+                    level = levelState,
+                    extraClickerIncome = levelState.currentLevel * 300L, //todo economy??
+                )
+            }
+        }.launchIn(viewModelScope)
+
         _state.onEach { gameState ->
             _stateUi.update { uiState ->
                 uiState.copy(
-                    levelText = "Level ${gameState.currentLevel}",
-                    levelPercentage = gameState.levelProgress,
+                    levelText = "Level ${gameState.level.currentLevel}",
+                    levelPercentage = gameState.level.progress,
                     statistics = GameUiState.Statistics(
                         total = formatBalance(gameState.totalBalance),
                         passive = formatIncome(calculatePassiveIncome(gameState.passiveIncome))
@@ -89,7 +93,7 @@ class GameViewModel @Inject constructor(
             }
         }.launchIn(viewModelScope)
 
-        startLevelDecreaseTimer()
+
         startPassiveIncomeTimer()
         startExtraClickersTimer()
     }
@@ -166,24 +170,6 @@ class GameViewModel @Inject constructor(
         }
     }
 
-    private fun startLevelDecreaseTimer() {
-        viewModelScope.launch {
-            while (true) {
-                delay(LEVEL_PROGRESS_DECREASE_TICK)
-                if (!_state.value.isLevelUpgradeInProgress) {
-                    _state.update { state ->
-                        state.copy(
-                            levelProgress = max(
-                                0f,
-                                state.levelProgress - LEVEL_PROGRESS_DECREASE_PER_TICK
-                            )
-                        )
-                    }
-                }
-            }
-        }
-    }
-
     private fun startPassiveIncomeTimer() {
         viewModelScope.launch {
             while (true) {
@@ -206,11 +192,17 @@ class GameViewModel @Inject constructor(
                 speedOfWorkders = 1f, //todo constant
                 incomePerWorkder = 1000, //todo should be specific per map
             ),
-            levelProgress = 0f,
-            currentLevel = 1,
             upgrades = getInitialUpgrades(),
             extraClickers = emptyList(),
-            isLevelUpgradeInProgress = false
+            level = GameState.LevelState(
+                progress = 0f,
+                currentLevel = 1,
+                isUpgrading = false
+            ),
+            boosts = GameState.BoostsState(
+                availableBoosts = emptyList(),
+                activeBoosts = emptyList(),
+            )
         )
     }
 
@@ -252,14 +244,7 @@ class GameViewModel @Inject constructor(
             GameAction.OnCustomizeClicked -> {}
             GameAction.OnSettingsClicked -> {}
             GameAction.OnStatsClicked -> {}
-            GameAction.onLevelUpgradeAnimationFinished -> {
-                _state.update {
-                    it.copy(
-                        levelProgress = 0f,
-                        isLevelUpgradeInProgress = false
-                    )
-                }
-            }
+            GameAction.onLevelUpgradeAnimationFinished -> levelManager.finishLevelUpgrade()
         }
     }
 
@@ -285,6 +270,8 @@ class GameViewModel @Inject constructor(
     }
 
     private fun onClickerClicked() {
+        levelManager.processClick()
+
         showClickIndication(
             clickerRadius = clickerSize.width / 2f,
             clickerCenter = clickerPosition,
@@ -292,19 +279,7 @@ class GameViewModel @Inject constructor(
         )
 
         _state.update {
-            val levelProgress =
-                if (_state.value.isLevelUpgradeInProgress) it.levelProgress else it.levelProgress + LEVEL_PROGRESS_PER_CLICK
-            val isLevelCompleted = (levelProgress) >= (1f + NEW_LEVEL_PROGRESS_EXCEED_THRESHOLD)
-            val levelProgressNormalized = min(levelProgress, 1f)
-            val newLevel = if (isLevelCompleted) it.currentLevel + 1 else it.currentLevel
-
-            it.copy(
-                totalBalance = it.totalBalance + it.clickIncome,
-                currentLevel = newLevel,
-                extraClickerIncome = newLevel * 300L, //todo economy??
-                levelProgress = levelProgressNormalized,
-                isLevelUpgradeInProgress = if (isLevelCompleted) true else it.isLevelUpgradeInProgress
-            )
+            it.copy(totalBalance = it.totalBalance + it.clickIncome)
         }
     }
 
