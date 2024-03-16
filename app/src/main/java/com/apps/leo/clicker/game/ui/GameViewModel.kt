@@ -1,9 +1,11 @@
 package com.apps.leo.clicker.game.ui
 
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.apps.leo.clicker.R
 import com.apps.leo.clicker.game.common.collections.add
 import com.apps.leo.clicker.game.common.collections.remove
 import com.apps.leo.clicker.game.common.collections.swap
@@ -88,7 +90,17 @@ class GameViewModel @Inject constructor(
                             gameState = gameState
                         )
                     },
-                    extraClickers = gameState.extraClickers
+                    extraClickers = gameState.extraClickers,
+                    boosts = listOf(
+                        GameUiState.Boost(
+                            id = UUID.randomUUID(),
+                            textResId = R.string.boostIncomeX2,
+                            color = Color.Green,
+                            status = GameUiState.Boost.BoostStatus.TemporarilyAvailable(
+                                timeLeftPercentage = 0.6f,
+                            )
+                        )
+                    )
                 )
             }
         }.launchIn(viewModelScope)

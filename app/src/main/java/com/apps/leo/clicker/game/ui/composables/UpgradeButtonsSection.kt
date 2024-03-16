@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.apps.leo.clicker.R
+import com.apps.leo.clicker.game.common.ui.composables.text.OutlinedText
 import com.apps.leo.clicker.game.domain.model.UpgradeType
 import com.apps.leo.clicker.game.ui.model.GameUiState
 import com.apps.leo.clicker.ui.theme.ClickerTheme
@@ -62,7 +63,7 @@ fun UpgradeButtonsSection(
         textMeasurer.measure(
             text = "999.99K",
             style = TextStyle(
-                color = Color.Black,
+                //todo should be same for the button as well
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
             )
@@ -226,13 +227,15 @@ private fun RowScope.PriceButton(
             .padding(8.dp)
             .width(priceButtonWidth)
     ) {
-        Text(
+        OutlinedText(
             text = buttonText,
-            style = TextStyle(
-                color = Color.Black,
+            textStyle = TextStyle(
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
-            )
+            ),
+            fillColor = Color.White,
+            strokeColor = Color.DarkGray,
+            strokeWidth = 3.sp,
         )
     }
 }

@@ -18,7 +18,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -28,12 +27,11 @@ import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.apps.leo.clicker.game.common.ui.composables.text.OutlinedText
 import com.apps.leo.clicker.ui.theme.ClickerTheme
 import kotlinx.coroutines.launch
 
@@ -90,7 +88,6 @@ private fun LevelSection(
     scale: Float
 ) {
     val border = 4.dp //todo to constants
-    val textMeasurer = rememberTextMeasurer()
 
     Box(
         contentAlignment = Alignment.Center,
@@ -134,26 +131,17 @@ private fun LevelSection(
                         cornerRadius = CornerRadius(12.dp.toPx())
                     )
                 }
-                .drawWithCache {
-                    val measuredText = textMeasurer.measure(
-                        text = levelText,
-                        style = TextStyle(
-                            color = Color.Black,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                        )
-                    )
-
-                    onDrawBehind {
-                        drawText(
-                            textLayoutResult = measuredText,
-                            topLeft = Offset(
-                                (size.width - measuredText.size.width) / 2f,
-                                (size.height - measuredText.size.height) / 2f
-                            )
-                        )
-                    }
-                }
+        )
+        OutlinedText(
+            text = levelText,
+            textStyle = TextStyle(
+                color = Color.Black,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+            ),
+            fillColor = Color.White,
+            strokeColor = Color.Black,
+            strokeWidth = 4.sp,
         )
     }
 }

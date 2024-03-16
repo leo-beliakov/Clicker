@@ -7,16 +7,20 @@ import androidx.compose.animation.core.TwoWayConverter
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.absoluteOffset
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.sp
+import com.apps.leo.clicker.game.common.ui.composables.text.OutlinedText
 import com.apps.leo.clicker.game.ui.model.GameSideEffects
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
@@ -54,8 +58,15 @@ fun IncomeIdicationArea(
 
     Box(modifier = modifier) {
         startedAnim.forEach { animatorInfo ->
-            Text(
+            OutlinedText(
                 text = animatorInfo.incomeText,
+                textStyle = TextStyle(
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                ),
+                fillColor = Color.White,
+                strokeColor = Color.Black,
+                strokeWidth = 2.sp,
                 modifier = Modifier
                     .absoluteOffset(
                         x = with(localDensity) { animatorInfo.initialCoordinates.x.toDp() },

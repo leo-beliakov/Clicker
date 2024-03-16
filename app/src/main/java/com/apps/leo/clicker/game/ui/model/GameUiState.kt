@@ -2,8 +2,10 @@ package com.apps.leo.clicker.game.ui.model
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.compose.ui.graphics.Color
 import com.apps.leo.clicker.game.domain.model.Upgrade
 import com.apps.leo.clicker.game.domain.model.UpgradeType
+import java.util.UUID
 
 const val START_LEVEL = 1
 
@@ -50,9 +52,23 @@ data class GameUiState(
     val upgradeButtons: List<UpgradeButtonState> = emptyList()
 ) {
     data class Boost(
-        val id: String,
-        val text: String
-    )
+        val id: UUID,
+        @StringRes val textResId: Int,
+        val color: Color,
+        val status: BoostStatus
+    ) {
+        sealed class BoostStatus {
+            object PermanentlyAvailable : BoostStatus()
+
+            data class TemporarilyAvailable(
+                val timeLeftPercentage: Float,
+            ) : BoostStatus()
+
+            data class Activated(
+                val timeLeftPercentage: Float,
+            ) : BoostStatus()
+        }
+    }
 
     data class Statistics(
         val total: String = "",
