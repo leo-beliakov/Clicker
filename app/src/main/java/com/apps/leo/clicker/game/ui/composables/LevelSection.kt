@@ -5,32 +5,24 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Fill
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.apps.leo.clicker.game.common.ui.composables.progress.HorizontalProgressBar
 import com.apps.leo.clicker.game.common.ui.composables.text.OutlinedText
 import com.apps.leo.clicker.ui.theme.ClickerTheme
 import kotlinx.coroutines.launch
@@ -87,8 +79,6 @@ private fun LevelSection(
     levelColor: Color,
     scale: Float
 ) {
-    val border = 4.dp //todo to constants
-
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
@@ -96,41 +86,14 @@ private fun LevelSection(
             .padding(vertical = 12.dp)
             .scale(scale)
     ) {
-        Spacer(
+        HorizontalProgressBar(
+            progress = levelPercentage,
+            borderColor = Color.Blue,
+            progressColor = levelColor,
+            borderWidth = 4.dp,
             modifier = Modifier
                 .fillMaxWidth(0.6f)
                 .height(50.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .padding(border / 2)
-                .drawBehind {
-                    val borderWidth = border.toPx()
-                    val halfBorderWidth = borderWidth / 2f
-
-                    drawRect(
-                        color = Color.LightGray,
-                        style = Fill,
-                        topLeft = Offset(halfBorderWidth, halfBorderWidth),
-                        size = Size(size.width - borderWidth, size.height - borderWidth),
-                    )
-                    if (levelPercentage > 0f) {
-                        drawRect(
-                            color = levelColor,
-                            style = Fill,
-                            topLeft = Offset(halfBorderWidth, halfBorderWidth),
-                            size = Size(
-                                size.width * levelPercentage - borderWidth,
-                                size.height - borderWidth
-                            ),
-                        )
-                    }
-                    drawRoundRect(
-                        color = Color.Blue,
-                        style = Stroke(width = 4.dp.toPx()),
-                        topLeft = Offset(0f, 0f),
-                        size = Size(size.width, size.height),
-                        cornerRadius = CornerRadius(12.dp.toPx())
-                    )
-                }
         )
         OutlinedText(
             text = levelText,

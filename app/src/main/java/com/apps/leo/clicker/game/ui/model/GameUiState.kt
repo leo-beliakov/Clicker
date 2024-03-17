@@ -53,7 +53,7 @@ data class GameUiState(
 ) {
     data class Boost(
         val id: UUID,
-        @StringRes val textResId: Int,
+        @DrawableRes val imageResId: Int,
         val color: Color,
         val status: BoostStatus
     ) {

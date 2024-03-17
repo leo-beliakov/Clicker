@@ -1,29 +1,27 @@
 package com.apps.leo.clicker.game.ui.composables.clicker
 
-import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Fill
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.apps.leo.clicker.game.common.ui.composables.text.OutlinedText
+import com.apps.leo.clicker.game.common.ui.composables.progress.CircleProgressBar
+import com.apps.leo.clicker.game.common.ui.composables.progress.HorizontalProgressBar
 import com.apps.leo.clicker.game.ui.model.GameUiState
+
+
+private const val BOOST_SIZE = 80
 
 @Composable
 fun BoostsSecton(
@@ -32,10 +30,10 @@ fun BoostsSecton(
     onBoostClicked: () -> Unit
 ) {
     Column(
-        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
     ) {
-        //todo we need to show active boosts first
         boosts.forEach { boost ->
             Boost(boost = boost)
         }
@@ -46,23 +44,17 @@ fun BoostsSecton(
 fun Boost(boost: GameUiState.Boost) {
     when (boost.status) {
         GameUiState.Boost.BoostStatus.PermanentlyAvailable -> PermanentBoost(boost)
-        is GameUiState.Boost.BoostStatus.TemporarilyAvailable -> TemporaryBoost(boost)
+        is GameUiState.Boost.BoostStatus.TemporarilyAvailable -> ActivatedBoost(boost)//TemporaryBoost(boost)
         is GameUiState.Boost.BoostStatus.Activated -> ActivatedBoost(boost)
     }
 }
 
 @Composable
 fun PermanentBoost(boost: GameUiState.Boost) {
-    OutlinedText(
-        text = stringResource(id = boost.textResId),
-        textStyle = TextStyle(
-            color = Color.Black,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
-        ),
-        fillColor = Color.White,
-        strokeColor = Color.Black,
-        strokeWidth = 2.sp,
+    Image(
+        painter = painterResource(id = boost.imageResId),
+        contentDescription = null,
+        modifier = Modifier.width(BOOST_SIZE.dp)
     )
 }
 
@@ -77,49 +69,31 @@ fun TemporaryBoost(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.width(IntrinsicSize.Min)
     ) {
-        OutlinedText(
-            text = stringResource(id = boost.textResId),
-            textStyle = TextStyle(
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center
-            ),
-            fillColor = boost.color,
-            strokeColor = Color.Black,
-            strokeWidth = 2.sp,
+        Image(
+            painter = painterResource(id = boost.imageResId),
+            contentDescription = null,
+            modifier = Modifier.width(BOOST_SIZE.dp)
         )
-        Canvas(
+        HorizontalProgressBar(
+            progress = boostStatus.timeLeftPercentage,
+            borderColor = Color.Black,
+            progressColor = boost.color,
+            borderWidth = 4.dp,
             modifier = Modifier
                 .height(15.dp)
                 .fillMaxWidth()
-        ) {
-            drawRect(
-                color = Color.LightGray,
-                style = Fill,
-                topLeft = Offset(2.dp.toPx(), 2.dp.toPx()),
-                size = Size(size.width - 4.dp.toPx(), size.height - 4.dp.toPx()),
-            )
-            drawRect(
-                color = boost.color,
-                style = Fill,
-                topLeft = Offset(2.dp.toPx(), 2.dp.toPx()),
-                size = Size(
-                    size.width * boostStatus.timeLeftPercentage - 2.dp.toPx(),
-                    size.height - 4.dp.toPx()
-                ),
-            )
-            drawRoundRect(
-                color = Color.Black,
-                style = Stroke(width = 4.dp.toPx()),
-                topLeft = Offset(0f, 0f),
-                size = Size(size.width, size.height),
-                cornerRadius = CornerRadius(12.dp.toPx())
-            )
-        }
+        )
     }
 }
 
 @Composable
 fun ActivatedBoost(boost: GameUiState.Boost) {
-
+    CircleProgressBar(
+        imageBitmap = ImageBitmap.imageResource(id = boost.imageResId),
+        fillColor = boost.color,
+        borderColor = Color.Black,
+        strokeWidth = 10.dp,
+        borderWidth = 3.dp,
+        modifier = Modifier.size(BOOST_SIZE.dp)
+    )
 }

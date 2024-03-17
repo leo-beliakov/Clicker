@@ -41,8 +41,8 @@ import kotlin.random.Random
 
 private const val PASSIVE_INCOME_TICK = 1000L
 
-private const val EXTRA_CLICKER_LIFESPAN = 4000L
-private const val EXTRA_CLICKER_SPAWN_DELAY = 3000L
+private const val EXTRA_CLICKER_LIFESPAN = 400L
+private const val EXTRA_CLICKER_SPAWN_DELAY = 300000L
 
 @HiltViewModel
 class GameViewModel @Inject constructor(
@@ -94,11 +94,17 @@ class GameViewModel @Inject constructor(
                     boosts = listOf(
                         GameUiState.Boost(
                             id = UUID.randomUUID(),
-                            textResId = R.string.boostIncomeX2,
+                            imageResId = R.drawable.ic_income_x2,
                             color = Color.Green,
                             status = GameUiState.Boost.BoostStatus.TemporarilyAvailable(
                                 timeLeftPercentage = 0.6f,
                             )
+                        ),
+                        GameUiState.Boost(
+                            id = UUID.randomUUID(),
+                            imageResId = R.drawable.ic_auto_click,
+                            color = Color.Magenta,
+                            status = GameUiState.Boost.BoostStatus.PermanentlyAvailable
                         )
                     )
                 )

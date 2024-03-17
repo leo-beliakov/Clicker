@@ -13,5 +13,6 @@
     <string name="upgrade_cursor_income_text">Increase Cursor\'s Revenue By 10%</string>
     <string name="upgrade_cursor_speed_title">CURSOR SPEED</string>
     <string name="upgrade_cursor_speed_text">Increase Cursor\'s Speed</string>
-    <string name="boostIncomeX2">X2\nINCOME</string>
+    <string name="boost_income_x2">X2\nINCOME</string>
+    <string name="boost_auto_click">AUTO\nCLICK</string>
 </resources>
