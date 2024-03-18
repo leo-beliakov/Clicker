@@ -5,7 +5,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apps.leo.clicker.R
-import com.apps.leo.clicker.game.common.collections.add
 import com.apps.leo.clicker.game.common.collections.swap
 import com.apps.leo.clicker.game.common.random.nextFloat
 import com.apps.leo.clicker.game.common.ui.formatAmountOfMoney
@@ -14,7 +13,7 @@ import com.apps.leo.clicker.game.domain.ExtraClickersManager
 import com.apps.leo.clicker.game.domain.GetInitialUpgradesUseCase
 import com.apps.leo.clicker.game.domain.GetUpgradePriceUseCase
 import com.apps.leo.clicker.game.domain.LevelManager
-import com.apps.leo.clicker.game.domain.PASSIVE_INCOME_WORKERS_REQUIRED_FOR_UPGRADE
+import com.apps.leo.clicker.game.domain.PassiveIncomeManager
 import com.apps.leo.clicker.game.domain.model.UpgradeType
 import com.apps.leo.clicker.game.ui.mapper.GameStateMapper
 import com.apps.leo.clicker.game.ui.model.ExtraClickerInfo
@@ -23,7 +22,6 @@ import com.apps.leo.clicker.game.ui.model.GameSideEffects
 import com.apps.leo.clicker.game.ui.model.GameState
 import com.apps.leo.clicker.game.ui.model.GameUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -36,11 +34,10 @@ import java.util.UUID
 import javax.inject.Inject
 import kotlin.random.Random
 
-private const val PASSIVE_INCOME_TICK = 1000L
-
 @HiltViewModel
 class GameViewModel @Inject constructor(
     private val levelManager: LevelManager,
+    private val passiveIncomeManager: PassiveIncomeManager,
     private val extraClickersManager: ExtraClickersManager,
     private val calculatePassiveIncome: CalculatePassiveIncomeUseCase,
     private val getInitialUpgrades: GetInitialUpgradesUseCase,
@@ -61,6 +58,7 @@ class GameViewModel @Inject constructor(
     init {
         subscribeToLevelState()
         subscribeToExtraClickersState()
+        subscribeToPassiveIncomeState()
 
         _state.onEach { gameState ->
             _stateUi.update { uiState ->
@@ -99,13 +97,10 @@ class GameViewModel @Inject constructor(
                 )
             }
         }.launchIn(viewModelScope)
-
-
-        startPassiveIncomeTimer()
     }
 
     private fun subscribeToLevelState() {
-        levelManager.level.onEach { levelState ->
+        levelManager.state.onEach { levelState ->
             _state.update {
                 it.copy(
                     level = levelState,
@@ -116,24 +111,15 @@ class GameViewModel @Inject constructor(
     }
 
     private fun subscribeToExtraClickersState() {
-        extraClickersManager.extraClickers.onEach { extraClickers ->
-            _state.update {
-                it.copy(extraClickers = extraClickers)
-            }
+        extraClickersManager.state.onEach { extraClickers ->
+            _state.update { it.copy(extraClickers = extraClickers) }
         }.launchIn(viewModelScope)
     }
 
-    private fun startPassiveIncomeTimer() {
-        viewModelScope.launch {
-            while (true) {
-                delay(PASSIVE_INCOME_TICK)
-                _state.update { gameState ->
-                    gameState.copy(
-                        totalBalance = gameState.totalBalance + calculatePassiveIncome(gameState.passiveIncome)
-                    )
-                }
-            }
-        }
+    private fun subscribeToPassiveIncomeState() {
+        passiveIncomeManager.state.onEach { passiveIncomeState ->
+            _state.update { it.copy(passiveIncome = passiveIncomeState) }
+        }.launchIn(viewModelScope)
     }
 
     private fun getInitialGameState(): GameState {
@@ -256,76 +242,24 @@ class GameViewModel @Inject constructor(
     }
 
     private fun onUpgradeButtonClicked(buttonState: GameUiState.UpgradeButtonState) {
-        _state.update {
-            val upgrade = it.upgrades.first { it.type == buttonState.type }
-            val updatedUpgrade = upgrade.copy(
-                level = upgrade.level + 1,
-                price = getUpgradePrice(upgrade.type, upgrade.level + 1)
-            )
-
-            //apply effects of the upgrade
-            val updatedState = when (upgrade.type) {
-                UpgradeType.CLICK_INCOME -> {
-                    //increase income per click
-                    it.copy(
-                        clickIncome = it.clickIncome * 2
-                    )
-                }
-
-                UpgradeType.ADD_CURSOR -> {
-                    val updatedWorkersList = it.passiveIncome.workers
-                        .add(GameState.PassiveIncome.Worker())
-                        .sortedBy { it.level }
-
-                    it.copy(
-                        passiveIncome = it.passiveIncome.copy(
-                            workers = updatedWorkersList
-                        )
-                    )
-                }
-
-                UpgradeType.MERGE_CURSORS -> {
-                    val workers = it.passiveIncome.workers
-                    val updatedWorkersList = workers.toMutableList()
-                    val workersLevels = workers.map { it.level }.toSet()
-
-                    for (level in workersLevels) {
-                        if (workers.count { it.level == level } >= PASSIVE_INCOME_WORKERS_REQUIRED_FOR_UPGRADE) {
-                            repeat(PASSIVE_INCOME_WORKERS_REQUIRED_FOR_UPGRADE) {
-                                val workerToRemove = updatedWorkersList.first { it.level == level }
-                                updatedWorkersList.remove(workerToRemove)
-                            }
-                            updatedWorkersList.add(GameState.PassiveIncome.Worker(level = level + 1))
-                            updatedWorkersList.sortBy { it.level }
-                            break
-                        }
-                    }
-
-                    it.copy(
-                        passiveIncome = it.passiveIncome.copy(
-                            workers = updatedWorkersList.toList()
-                        )
-                    )
-                }
-
-                UpgradeType.CURSOR_INCOME -> {
-                    it.copy(
-                        passiveIncome = it.passiveIncome.copy(
-                            incomePerWorkder = (it.passiveIncome.incomePerWorkder * 1.1).toLong()
-                        )
-                    )
-                }
-
-                UpgradeType.CURSOR_SPEED -> {
-                    it.copy(
-                        passiveIncome = it.passiveIncome.copy(
-                            speedOfWorkders = it.passiveIncome.speedOfWorkders * 1.1f
-                        )
-                    )
-                }
+        val upgrade = _state.value.upgrades.first { it.type == buttonState.type }
+        when (upgrade.type) {
+            UpgradeType.ADD_CURSOR -> passiveIncomeManager.addWorker()
+            UpgradeType.MERGE_CURSORS -> passiveIncomeManager.mergeWorkers()
+            UpgradeType.CURSOR_INCOME -> passiveIncomeManager.upgradeIncome()
+            UpgradeType.CURSOR_SPEED -> passiveIncomeManager.upgradeSpeed()
+            UpgradeType.CLICK_INCOME -> {
+                _state.update { it.copy(clickIncome = it.clickIncome * 2) }
             }
+        }
 
-            updatedState.copy(
+        val updatedUpgrade = upgrade.copy(
+            level = upgrade.level + 1,
+            price = getUpgradePrice(upgrade.type, upgrade.level + 1)
+        )
+
+        _state.update {
+            it.copy(
                 totalBalance = it.totalBalance - buttonState.price,
                 upgrades = it.upgrades.swap(upgrade, updatedUpgrade)
             )

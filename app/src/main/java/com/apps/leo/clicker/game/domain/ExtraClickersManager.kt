@@ -26,8 +26,8 @@ class ExtraClickersManager @Inject constructor() {
 
     private val coroutineScope = CoroutineScope(Job())
 
-    private val _extraClickers = MutableStateFlow<List<ExtraClickerInfo>>(emptyList())
-    val extraClickers = _extraClickers.asStateFlow()
+    private val _state = MutableStateFlow<List<ExtraClickerInfo>>(emptyList())
+    val state = _state.asStateFlow()
 
     var clickerBounds = Rect.Zero
     var clickerAreaSize = IntSize.Zero
@@ -51,11 +51,11 @@ class ExtraClickersManager @Inject constructor() {
                 )
 
                 launch {
-                    _extraClickers.update {
+                    _state.update {
                         it.add(extraClickerInfo)
                     }
                     delay(EXTRA_CLICKER_LIFESPAN)
-                    _extraClickers.update {
+                    _state.update {
                         it.swap(
                             extraClickerInfo,
                             extraClickerInfo.reduceClicks()
@@ -71,7 +71,7 @@ class ExtraClickersManager @Inject constructor() {
     private fun generateExtraClickerCoordinates(): Rect {
         val smallClickerSize = clickerBounds.width / 3f //todo should be a field?
         val prohibitedAreas = mutableListOf(clickerBounds, statisticsAreaBounds, boostsAreaBounds)
-        prohibitedAreas.addAll(_extraClickers.value.map { it.bounds })
+        prohibitedAreas.addAll(_state.value.map { it.bounds })
 
         while (true) {
             val randomPoint = Random.nextOffset(
@@ -96,10 +96,10 @@ class ExtraClickersManager @Inject constructor() {
     }
 
     fun onExtraClickerDisappeared(info: ExtraClickerInfo) {
-        _extraClickers.update { it.remove(info) }
+        _state.update { it.remove(info) }
     }
 
     fun onExtraClickerClicked(info: ExtraClickerInfo) {
-        _extraClickers.update { it.swap(info, info.reduceClicks()) }
+        _state.update { it.swap(info, info.reduceClicks()) }
     }
 }

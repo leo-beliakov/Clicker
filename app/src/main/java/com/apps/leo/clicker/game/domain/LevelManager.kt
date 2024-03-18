@@ -21,15 +21,15 @@ class LevelManager @Inject constructor() {
 
     private val coroutineScope = CoroutineScope(Job())
 
-    private val _level = MutableStateFlow(getInitialLevel())
-    val level = _level.asStateFlow()
+    private val _state = MutableStateFlow(getInitialLevel())
+    val state = _state.asStateFlow()
 
     init {
         startLevelDecreaseTimer()
     }
 
     fun processClick() {
-        val levelState = _level.value
+        val levelState = _state.value
         val levelProgress = if (levelState.isUpgrading) {
             levelState.progress
         } else {
@@ -40,7 +40,7 @@ class LevelManager @Inject constructor() {
         val newLevel =
             if (isLevelCompleted) levelState.currentLevel + 1 else levelState.currentLevel
 
-        _level.update {
+        _state.update {
             it.copy(
                 currentLevel = newLevel,
                 progress = levelProgressNormalized,
@@ -50,7 +50,7 @@ class LevelManager @Inject constructor() {
     }
 
     fun finishLevelUpgrade() {
-        _level.update {
+        _state.update {
             it.copy(
                 progress = 0f,
                 isUpgrading = false
@@ -70,8 +70,8 @@ class LevelManager @Inject constructor() {
         coroutineScope.launch {
             while (true) {
                 delay(LEVEL_PROGRESS_DECREASE_TICK)
-                if (!_level.value.isUpgrading) {
-                    _level.update { level ->
+                if (!_state.value.isUpgrading) {
+                    _state.update { level ->
                         level.copy(
                             progress = max(
                                 0f,
