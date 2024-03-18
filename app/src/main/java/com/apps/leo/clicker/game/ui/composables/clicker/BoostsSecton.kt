@@ -89,7 +89,7 @@ fun TemporaryBoost(
 @Composable
 fun ActivatedBoost(boost: GameUiState.Boost) {
     CircleProgressBar(
-        imageBitmap = ImageBitmap.imageResource(id = boost.imageResId),
+        imageBitmap = ImageBitmap.imageResource(id = boost.imageActivatedResId),
         fillColor = boost.color,
         borderColor = Color.Black,
         strokeWidth = 10.dp,

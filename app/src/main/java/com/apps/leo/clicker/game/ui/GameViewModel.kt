@@ -95,7 +95,8 @@ class GameViewModel @Inject constructor(
                         GameUiState.Boost(
                             id = UUID.randomUUID(),
                             imageResId = R.drawable.ic_income_x2,
-                            color = Color.Green,
+                            imageActivatedResId = R.drawable.ic_income_x2_zoom,
+                            color = Color.Blue,
                             status = GameUiState.Boost.BoostStatus.TemporarilyAvailable(
                                 timeLeftPercentage = 0.6f,
                             )
@@ -103,6 +104,7 @@ class GameViewModel @Inject constructor(
                         GameUiState.Boost(
                             id = UUID.randomUUID(),
                             imageResId = R.drawable.ic_auto_click,
+                            imageActivatedResId = R.drawable.ic_auto_zoom,
                             color = Color.Magenta,
                             status = GameUiState.Boost.BoostStatus.PermanentlyAvailable
                         )
