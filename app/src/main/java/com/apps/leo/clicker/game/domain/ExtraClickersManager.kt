@@ -19,7 +19,7 @@ import java.util.UUID
 import javax.inject.Inject
 import kotlin.random.Random
 
-private const val EXTRA_CLICKER_LIFESPAN = 400L
+private const val EXTRA_CLICKER_LIFESPAN = 500L
 private const val EXTRA_CLICKER_SPAWN_DELAY = 300L
 
 class ExtraClickersManager @Inject constructor() {
@@ -50,11 +50,10 @@ class ExtraClickersManager @Inject constructor() {
                     bounds = generateExtraClickerCoordinates()
                 )
 
-                _extraClickers.update { it.add(extraClickerInfo) }
-
-                delay(EXTRA_CLICKER_SPAWN_DELAY)
-
                 launch {
+                    _extraClickers.update {
+                        it.add(extraClickerInfo)
+                    }
                     delay(EXTRA_CLICKER_LIFESPAN)
                     _extraClickers.update {
                         it.swap(
@@ -63,12 +62,14 @@ class ExtraClickersManager @Inject constructor() {
                         )
                     }
                 }
+
+                delay(EXTRA_CLICKER_SPAWN_DELAY)
             }
         }
     }
 
     private fun generateExtraClickerCoordinates(): Rect {
-        val smallClickerSize = clickerBounds.width / 4f //todo should be a field?
+        val smallClickerSize = clickerBounds.width / 3f //todo should be a field?
         val prohibitedAreas = mutableListOf(clickerBounds, statisticsAreaBounds, boostsAreaBounds)
         prohibitedAreas.addAll(_extraClickers.value.map { it.bounds })
 

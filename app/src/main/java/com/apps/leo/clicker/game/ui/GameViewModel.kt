@@ -189,7 +189,9 @@ class GameViewModel @Inject constructor(
 
             is GameAction.OnExtraClickerClicked -> onExtraClickerClicked(action.info)
 
-            is GameAction.OnExtraClickerDisappeared -> onExtraClickerDisappeared(action.info)
+            is GameAction.OnExtraClickerDisappeared -> {
+                extraClickersManager.onExtraClickerDisappeared(action.info)
+            }
 
             is GameAction.OnUpgradeButtonClicked -> onUpgradeButtonClicked(action.upgradeButtonState)
 
@@ -206,10 +208,6 @@ class GameViewModel @Inject constructor(
                 extraClickersManager.statisticsAreaBounds = action.bounds
             }
         }
-    }
-
-    private fun onExtraClickerDisappeared(info: ExtraClickerInfo) {
-        extraClickersManager.onExtraClickerDisappeared(info)
     }
 
     private fun onExtraClickerClicked(info: ExtraClickerInfo) {
