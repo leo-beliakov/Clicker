@@ -1,14 +1,11 @@
 package com.apps.leo.clicker.game.ui
 
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.apps.leo.clicker.R
 import com.apps.leo.clicker.game.common.collections.swap
 import com.apps.leo.clicker.game.common.random.nextFloat
 import com.apps.leo.clicker.game.common.ui.formatAmountOfMoney
-import com.apps.leo.clicker.game.domain.CalculatePassiveIncomeUseCase
 import com.apps.leo.clicker.game.domain.ExtraClickersManager
 import com.apps.leo.clicker.game.domain.GetInitialUpgradesUseCase
 import com.apps.leo.clicker.game.domain.GetUpgradePriceUseCase
@@ -30,7 +27,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.UUID
 import javax.inject.Inject
 import kotlin.random.Random
 
@@ -39,7 +35,6 @@ class GameViewModel @Inject constructor(
     private val levelManager: LevelManager,
     private val passiveIncomeManager: PassiveIncomeManager,
     private val extraClickersManager: ExtraClickersManager,
-    private val calculatePassiveIncome: CalculatePassiveIncomeUseCase,
     private val getInitialUpgrades: GetInitialUpgradesUseCase,
     private val getUpgradePrice: GetUpgradePriceUseCase,
     private val mapper: GameStateMapper,
@@ -57,44 +52,12 @@ class GameViewModel @Inject constructor(
 
     init {
         subscribeToLevelState()
-        subscribeToExtraClickersState()
+//        subscribeToExtraClickersState()
         subscribeToPassiveIncomeState()
 
         _state.onEach { gameState ->
             _stateUi.update { uiState ->
-                uiState.copy(
-                    levelText = "Level ${gameState.level.currentLevel}",
-                    levelPercentage = gameState.level.progress,
-                    statistics = GameUiState.Statistics(
-                        total = formatBalance(gameState.totalBalance),
-                        passive = formatIncome(calculatePassiveIncome(gameState.passiveIncome))
-                    ),
-                    upgradeButtons = gameState.upgrades.map {//todo i don't like that we have to map it on every state change
-                        mapper.mapUpgradeToButtonState(
-                            upgrade = it,
-                            gameState = gameState
-                        )
-                    },
-                    extraClickers = gameState.extraClickers,
-                    boosts = listOf(
-                        GameUiState.Boost(
-                            id = UUID.randomUUID(),
-                            imageResId = R.drawable.ic_income_x2,
-                            imageActivatedResId = R.drawable.ic_income_x2_zoom,
-                            color = Color.Blue,
-                            status = GameUiState.Boost.BoostStatus.TemporarilyAvailable(
-                                timeLeftPercentage = 0.6f,
-                            )
-                        ),
-                        GameUiState.Boost(
-                            id = UUID.randomUUID(),
-                            imageResId = R.drawable.ic_auto_click,
-                            imageActivatedResId = R.drawable.ic_auto_zoom,
-                            color = Color.Magenta,
-                            status = GameUiState.Boost.BoostStatus.PermanentlyAvailable
-                        )
-                    )
-                )
+                mapper.map(uiState, gameState)
             }
         }.launchIn(viewModelScope)
     }
@@ -152,18 +115,12 @@ class GameViewModel @Inject constructor(
         )
     }
 
-    private fun formatIncome(passiveIncome: Long): String {
-        val formatedMoney = formatAmountOfMoney(passiveIncome)
-        return "$formatedMoney/Sec"
-    }
-
-    private fun formatBalance(totalBalance: Long): String {
-        return formatAmountOfMoney(totalBalance)
-    }
-
     fun onAction(action: GameAction) {
         when (action) {
-            is GameAction.OnBoostClicked -> {}
+            is GameAction.OnBoostClicked -> {
+
+            }
+
             is GameAction.OnClickerPositioned -> {
                 extraClickersManager.clickerBounds = action.bounds
                 clickerBounds = action.bounds

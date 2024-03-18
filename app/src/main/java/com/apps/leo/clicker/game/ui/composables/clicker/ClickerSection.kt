@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.Flow
 fun ClickerSection(
     boosts: List<GameUiState.Boost>,
     statistics: GameUiState.Statistics,
-    onBoostClicked: () -> Unit,
+    onBoostClicked: (boost: GameUiState.Boost) -> Unit,
     onClickerClicked: () -> Unit,
     onExtraClickerClicked: (ExtraClickerInfo) -> Unit,
     onExtraClickerDisappeared: (ExtraClickerInfo) -> Unit,

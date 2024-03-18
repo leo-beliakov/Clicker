@@ -9,8 +9,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,7 +35,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -46,6 +43,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.apps.leo.clicker.R
+import com.apps.leo.clicker.game.common.ui.composables.clickable.invisibleClickable
 import com.apps.leo.clicker.game.common.ui.composables.text.OutlinedText
 import com.apps.leo.clicker.game.domain.model.UpgradeType
 import com.apps.leo.clicker.game.ui.model.GameUiState
@@ -104,11 +102,8 @@ fun UpgradeButton(
             .fillMaxWidth()
             .height(IntrinsicSize.Max)
             .scale(scale.value)
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
+            .invisibleClickable(
                 enabled = state.isAvailable && !state.isMax,
-                role = Role.Button,
                 onClick = {
                     job?.cancel()
                     job = scope.launch {

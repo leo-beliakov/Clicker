@@ -63,7 +63,7 @@ private fun GameScreen(
             statistics = state.statistics,
             incomeSideEffects = sideEffects.filterIsInstance<GameSideEffects.ShowIncome>(),
             extraClickers = state.extraClickers,
-            onBoostClicked = {},
+            onBoostClicked = { onAction(GameAction.OnBoostClicked(it)) },
             onClickerPositioned = { onAction(GameAction.OnClickerPositioned(it)) },
             onStatisticsPositioned = { onAction(GameAction.OnStatisticsPositioned(it)) },
             onBoostsPositioned = { onAction(GameAction.OnBoostsPositioned(it)) },
