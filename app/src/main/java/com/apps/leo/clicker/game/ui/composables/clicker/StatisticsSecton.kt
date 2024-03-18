@@ -4,7 +4,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.boundsInParent
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
@@ -14,11 +17,12 @@ import com.apps.leo.clicker.game.ui.model.GameUiState
 @Composable
 fun StatisticsSecton(
     statistics: GameUiState.Statistics,
+    onStatisticsPositioned: (bounds: Rect) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
         horizontalAlignment = Alignment.End,
-        modifier = modifier
+        modifier = modifier.onGloballyPositioned { onStatisticsPositioned(it.boundsInParent()) }
     ) {
         OutlinedText(
             text = statistics.total,

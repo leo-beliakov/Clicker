@@ -4,15 +4,18 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.layout.boundsInParent
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -26,13 +29,14 @@ private const val BOOST_SIZE = 80
 @Composable
 fun BoostsSecton(
     boosts: List<GameUiState.Boost>,
+    onBoostClicked: () -> Unit,
     modifier: Modifier = Modifier,
-    onBoostClicked: () -> Unit
+    onBoostsPositioned: (bounds: Rect) -> Unit,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier
+        modifier = modifier.onGloballyPositioned { onBoostsPositioned(it.boundsInParent()) }
     ) {
         boosts.forEach { boost ->
             Boost(boost = boost)
@@ -54,7 +58,6 @@ fun PermanentBoost(boost: GameUiState.Boost) {
     Image(
         painter = painterResource(id = boost.imageResId),
         contentDescription = null,
-        modifier = Modifier.width(BOOST_SIZE.dp)
     )
 }
 
@@ -72,7 +75,7 @@ fun TemporaryBoost(
         Image(
             painter = painterResource(id = boost.imageResId),
             contentDescription = null,
-            modifier = Modifier.width(BOOST_SIZE.dp)
+//            modifier = Modifier.width(BOOST_SIZE.dp)
         )
         HorizontalProgressBar(
             progress = boostStatus.timeLeftPercentage,
@@ -94,6 +97,8 @@ fun ActivatedBoost(boost: GameUiState.Boost) {
         borderColor = Color.Black,
         strokeWidth = 10.dp,
         borderWidth = 3.dp,
-        modifier = Modifier.size(BOOST_SIZE.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(1f)
     )
 }

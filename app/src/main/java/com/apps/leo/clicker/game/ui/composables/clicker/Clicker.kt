@@ -10,18 +10,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.unit.IntSize
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 @Composable
 fun Clicker(
-    onClickerPositioned: (size: IntSize, centerCoordinates: Offset) -> Unit,
+    onClickerPositioned: (bounds: Rect) -> Unit,
     onClickerClicked: () -> Unit,
     color: Color = Color.Red,
     modifier: Modifier = Modifier
@@ -34,17 +33,7 @@ fun Clicker(
 
     Canvas(
         modifier = modifier
-            .onGloballyPositioned { coordinates ->
-                val offsetToCenter = Offset(
-                    coordinates.size.width / 2f,
-                    coordinates.size.height / 2f
-                )
-                val centerCoordinates = coordinates
-                    .positionInParent()
-                    .plus(offsetToCenter)
-
-                onClickerPositioned(coordinates.size, centerCoordinates)
-            }
+            .onGloballyPositioned { onClickerPositioned(it.boundsInParent()) }
             .scale(scale.value)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },

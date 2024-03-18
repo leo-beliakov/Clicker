@@ -1,6 +1,6 @@
 package com.apps.leo.clicker.game.ui.model
 
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.unit.IntSize
 
 sealed interface GameAction {
@@ -11,12 +11,19 @@ sealed interface GameAction {
     object OnCustomizeClicked : GameAction
 
     data class OnClickerPositioned(
-        val size: IntSize,
-        val center: Offset
+        val bounds: Rect
     ) : GameAction
 
     data class OnClickerAreaPositioned(
         val size: IntSize,
+    ) : GameAction
+
+    data class OnBoostsPositioned(
+        val bounds: Rect,
+    ) : GameAction
+
+    data class OnStatisticsPositioned(
+        val bounds: Rect,
     ) : GameAction
 
     data class OnBoostClicked(

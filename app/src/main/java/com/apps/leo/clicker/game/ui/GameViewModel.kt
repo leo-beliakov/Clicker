@@ -1,19 +1,16 @@
 package com.apps.leo.clicker.game.ui
 
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apps.leo.clicker.R
 import com.apps.leo.clicker.game.common.collections.add
-import com.apps.leo.clicker.game.common.collections.remove
 import com.apps.leo.clicker.game.common.collections.swap
-import com.apps.leo.clicker.game.common.geometry.distance2D
 import com.apps.leo.clicker.game.common.random.nextFloat
-import com.apps.leo.clicker.game.common.random.nextOffset
 import com.apps.leo.clicker.game.common.ui.formatAmountOfMoney
 import com.apps.leo.clicker.game.domain.CalculatePassiveIncomeUseCase
+import com.apps.leo.clicker.game.domain.ExtraClickersManager
 import com.apps.leo.clicker.game.domain.GetInitialUpgradesUseCase
 import com.apps.leo.clicker.game.domain.GetUpgradePriceUseCase
 import com.apps.leo.clicker.game.domain.LevelManager
@@ -41,12 +38,10 @@ import kotlin.random.Random
 
 private const val PASSIVE_INCOME_TICK = 1000L
 
-private const val EXTRA_CLICKER_LIFESPAN = 400L
-private const val EXTRA_CLICKER_SPAWN_DELAY = 300000L
-
 @HiltViewModel
 class GameViewModel @Inject constructor(
     private val levelManager: LevelManager,
+    private val extraClickersManager: ExtraClickersManager,
     private val calculatePassiveIncome: CalculatePassiveIncomeUseCase,
     private val getInitialUpgrades: GetInitialUpgradesUseCase,
     private val getUpgradePrice: GetUpgradePriceUseCase,
@@ -61,19 +56,11 @@ class GameViewModel @Inject constructor(
     private val _sideEffects = MutableSharedFlow<GameSideEffects>(replay = 1)
     val sideEffects = _sideEffects.asSharedFlow()
 
-    private var clickerSize = IntSize.Zero
-    private var clickerPosition = Offset.Zero
-    private var clickerAreaSize = IntSize.Zero
+    private var clickerBounds = Rect.Zero
 
     init {
-        levelManager.level.onEach { levelState ->
-            _state.update {
-                it.copy(
-                    level = levelState,
-                    extraClickerIncome = levelState.currentLevel * 300L, //todo economy??
-                )
-            }
-        }.launchIn(viewModelScope)
+        subscribeToLevelState()
+        subscribeToExtraClickersState()
 
         _state.onEach { gameState ->
             _stateUi.update { uiState ->
@@ -115,79 +102,25 @@ class GameViewModel @Inject constructor(
 
 
         startPassiveIncomeTimer()
-        startExtraClickersTimer()
     }
 
-    private fun startExtraClickersTimer() {
-        viewModelScope.launch {
-            delay(2000)
-            while (true) {
-                //todo reifine conditions to emit random clickers (start & end of the level)
-                val clickerRadius = clickerSize.width / 2f
-                val extraClickerRadius = clickerRadius / 3
-
-                val centerCoordinates = generateExtraClickerCoordinates()
-                val topLeftCoordinates = centerCoordinates.copy(
-                    x = centerCoordinates.x - extraClickerRadius,
-                    y = centerCoordinates.y - extraClickerRadius
+    private fun subscribeToLevelState() {
+        levelManager.level.onEach { levelState ->
+            _state.update {
+                it.copy(
+                    level = levelState,
+                    extraClickerIncome = levelState.currentLevel * 300L, //todo economy??
                 )
-
-                val extraClickerInfo = ExtraClickerInfo(
-                    id = UUID.randomUUID(),
-                    remainedClicks = 1,
-                    radius = extraClickerRadius,
-                    centerCoordinates = centerCoordinates,
-                    topLeftCoordinates = topLeftCoordinates,
-                )
-
-                _state.update {
-                    val updatedClickersList = it.extraClickers.add(extraClickerInfo)
-                    it.copy(extraClickers = updatedClickersList)
-                }
-
-                delay(EXTRA_CLICKER_SPAWN_DELAY)
-
-                launch {
-                    delay(EXTRA_CLICKER_LIFESPAN)
-                    _state.update {
-                        it.copy(
-                            extraClickers = it.extraClickers.swap(
-                                extraClickerInfo,
-                                extraClickerInfo.reduceClicks()
-                            )
-                        )
-                    }
-                }
             }
-        }
+        }.launchIn(viewModelScope)
     }
 
-    private fun generateExtraClickerCoordinates(): Offset {
-        val clickerRadius = clickerSize.width / 2f
-        val smallClickerRadius = clickerRadius / 3//todo should be a field?
-        val prohibitedAreaRadius = clickerRadius + smallClickerRadius
-        val otherClickers = _state.value.extraClickers
-
-        while (true) {
-            val randomPoint = Random.nextOffset(
-                xFrom = smallClickerRadius,
-                xUntil = clickerAreaSize.width - smallClickerRadius,
-                yFrom = smallClickerRadius,
-                yUntil = clickerAreaSize.height - smallClickerRadius,
-            )
-
-            val isNotOverlaping = otherClickers.all { clicker ->
-                distance2D(randomPoint, clicker.centerCoordinates) > (smallClickerRadius * 2)
+    private fun subscribeToExtraClickersState() {
+        extraClickersManager.extraClickers.onEach { extraClickers ->
+            _state.update {
+                it.copy(extraClickers = extraClickers)
             }
-
-            if (isNotOverlaping && distance2D(
-                    randomPoint,
-                    clickerPosition
-                ) > prohibitedAreaRadius
-            ) {
-                return randomPoint
-            }
-        }
+        }.launchIn(viewModelScope)
     }
 
     private fun startPassiveIncomeTimer() {
@@ -246,12 +179,12 @@ class GameViewModel @Inject constructor(
         when (action) {
             is GameAction.OnBoostClicked -> {}
             is GameAction.OnClickerPositioned -> {
-                clickerSize = action.size
-                clickerPosition = action.center
+                extraClickersManager.clickerBounds = action.bounds
+                clickerBounds = action.bounds
             }
 
             is GameAction.OnClickerAreaPositioned -> {
-                clickerAreaSize = action.size
+                extraClickersManager.clickerAreaSize = action.size
             }
 
             is GameAction.OnExtraClickerClicked -> onExtraClickerClicked(action.info)
@@ -265,27 +198,29 @@ class GameViewModel @Inject constructor(
             GameAction.OnSettingsClicked -> {}
             GameAction.OnStatsClicked -> {}
             GameAction.onLevelUpgradeAnimationFinished -> levelManager.finishLevelUpgrade()
+            is GameAction.OnBoostsPositioned -> {
+                extraClickersManager.boostsAreaBounds = action.bounds
+            }
+
+            is GameAction.OnStatisticsPositioned -> {
+                extraClickersManager.statisticsAreaBounds = action.bounds
+            }
         }
     }
 
     private fun onExtraClickerDisappeared(info: ExtraClickerInfo) {
-        _state.update {
-            it.copy(extraClickers = it.extraClickers.remove(info))
-        }
+        extraClickersManager.onExtraClickerDisappeared(info)
     }
 
     private fun onExtraClickerClicked(info: ExtraClickerInfo) {
         showClickIndication(
-            clickerRadius = info.radius,
-            clickerCenter = info.centerCoordinates,
+            clickerBounds = info.bounds,
             incomePerClick = _state.value.extraClickerIncome
         )
 
+        extraClickersManager.onExtraClickerClicked(info)
         _state.update {
-            it.copy(
-                totalBalance = it.totalBalance + it.extraClickerIncome,
-                extraClickers = it.extraClickers.swap(info, info.reduceClicks())
-            )
+            it.copy(totalBalance = it.totalBalance + it.extraClickerIncome)
         }
     }
 
@@ -293,8 +228,7 @@ class GameViewModel @Inject constructor(
         levelManager.processClick()
 
         showClickIndication(
-            clickerRadius = clickerSize.width / 2f,
-            clickerCenter = clickerPosition,
+            clickerBounds = clickerBounds,
             incomePerClick = _state.value.clickIncome
         )
 
@@ -304,12 +238,11 @@ class GameViewModel @Inject constructor(
     }
 
     private fun showClickIndication(
-        clickerRadius: Float,
-        clickerCenter: Offset,
+        clickerBounds: Rect,
         incomePerClick: Long
     ) {
         viewModelScope.launch {
-            val clickerIncomeIndicationAreaRadius = clickerRadius * 0.3f
+            val clickerIncomeIndicationAreaRadius = clickerBounds.width * 0.15f
             val randomOffsetX = Random.nextFloat(
                 from = -clickerIncomeIndicationAreaRadius,
                 until = clickerIncomeIndicationAreaRadius
@@ -317,7 +250,7 @@ class GameViewModel @Inject constructor(
 
             _sideEffects.emit(
                 GameSideEffects.ShowIncome(
-                    coordinates = clickerCenter.copy(x = clickerCenter.x + randomOffsetX),
+                    coordinates = clickerBounds.center.copy(x = clickerBounds.center.x + randomOffsetX),
                     incomeText = "+${formatAmountOfMoney(incomePerClick)}"
                 )
             )
