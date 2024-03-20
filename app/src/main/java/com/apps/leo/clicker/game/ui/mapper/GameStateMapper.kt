@@ -6,9 +6,9 @@ import com.apps.leo.clicker.game.common.ui.formatAmountOfMoney
 import com.apps.leo.clicker.game.domain.CalculatePassiveIncomeUseCase
 import com.apps.leo.clicker.game.domain.CheckIfUpgradeIsAvailableUseCase
 import com.apps.leo.clicker.game.domain.CheckIfUpgradeIsMaxUseCase
+import com.apps.leo.clicker.game.domain.model.GameState
 import com.apps.leo.clicker.game.domain.model.Upgrade
 import com.apps.leo.clicker.game.domain.model.UpgradeType
-import com.apps.leo.clicker.game.ui.model.GameState
 import com.apps.leo.clicker.game.ui.model.GameUiState
 import java.util.UUID
 import javax.inject.Inject

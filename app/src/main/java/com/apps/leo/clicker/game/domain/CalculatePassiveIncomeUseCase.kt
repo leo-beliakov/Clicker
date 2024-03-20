@@ -1,6 +1,6 @@
 package com.apps.leo.clicker.game.domain
 
-import com.apps.leo.clicker.game.ui.model.GameState
+import com.apps.leo.clicker.game.domain.model.GameState
 import javax.inject.Inject
 import kotlin.math.roundToLong
 

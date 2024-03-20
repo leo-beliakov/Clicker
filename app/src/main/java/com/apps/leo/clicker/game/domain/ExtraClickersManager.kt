@@ -7,7 +7,7 @@ import com.apps.leo.clicker.game.common.collections.add
 import com.apps.leo.clicker.game.common.collections.remove
 import com.apps.leo.clicker.game.common.collections.swap
 import com.apps.leo.clicker.game.common.random.nextOffset
-import com.apps.leo.clicker.game.ui.model.ExtraClickerInfo
+import com.apps.leo.clicker.game.domain.model.ExtraClickerInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay

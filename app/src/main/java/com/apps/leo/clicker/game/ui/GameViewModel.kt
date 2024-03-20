@@ -11,12 +11,12 @@ import com.apps.leo.clicker.game.domain.GetInitialUpgradesUseCase
 import com.apps.leo.clicker.game.domain.GetUpgradePriceUseCase
 import com.apps.leo.clicker.game.domain.LevelManager
 import com.apps.leo.clicker.game.domain.PassiveIncomeManager
+import com.apps.leo.clicker.game.domain.model.ExtraClickerInfo
+import com.apps.leo.clicker.game.domain.model.GameState
 import com.apps.leo.clicker.game.domain.model.UpgradeType
 import com.apps.leo.clicker.game.ui.mapper.GameStateMapper
-import com.apps.leo.clicker.game.ui.model.ExtraClickerInfo
 import com.apps.leo.clicker.game.ui.model.GameAction
 import com.apps.leo.clicker.game.ui.model.GameSideEffects
-import com.apps.leo.clicker.game.ui.model.GameState
 import com.apps.leo.clicker.game.ui.model.GameUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow

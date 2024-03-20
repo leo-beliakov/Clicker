@@ -2,6 +2,7 @@ package com.apps.leo.clicker.game.ui.model
 
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.unit.IntSize
+import com.apps.leo.clicker.game.domain.model.ExtraClickerInfo
 
 sealed interface GameAction {
     object OnClickerClicked : GameAction

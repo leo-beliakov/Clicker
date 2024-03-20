@@ -1,4 +1,4 @@
-package com.apps.leo.clicker.game.ui.model
+package com.apps.leo.clicker.game.domain.model
 
 import androidx.compose.ui.geometry.Rect
 import java.util.UUID

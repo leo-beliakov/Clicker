@@ -12,7 +12,7 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import com.apps.leo.clicker.game.ui.model.ExtraClickerInfo
+import com.apps.leo.clicker.game.domain.model.ExtraClickerInfo
 import com.apps.leo.clicker.game.ui.model.GameSideEffects
 import com.apps.leo.clicker.game.ui.model.GameUiState
 import kotlinx.coroutines.flow.Flow

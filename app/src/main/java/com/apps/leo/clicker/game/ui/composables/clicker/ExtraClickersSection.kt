@@ -15,7 +15,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpSize
-import com.apps.leo.clicker.game.ui.model.ExtraClickerInfo
+import com.apps.leo.clicker.game.domain.model.ExtraClickerInfo
 
 @Composable
 fun ExtraClickersSection(
