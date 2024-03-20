@@ -24,8 +24,8 @@ import androidx.compose.ui.unit.sp
 fun OutlinedText(
     text: String,
     textStyle: TextStyle,
-    fillColor: Color,
-    strokeColor: Color,
+    fillColor: Color = Color.White,
+    strokeColor: Color = Color.Black,
     strokeWidth: TextUnit = 1.sp,
     modifier: Modifier = Modifier
 ) {

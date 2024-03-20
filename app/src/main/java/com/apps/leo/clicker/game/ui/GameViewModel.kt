@@ -118,7 +118,14 @@ class GameViewModel @Inject constructor(
     fun onAction(action: GameAction) {
         when (action) {
             is GameAction.OnBoostClicked -> {
-
+                _stateUi.update {
+                    it.copy(
+                        dialogState = GameUiState.DialogState(
+                            action.boost,
+                            action.boost.status.toString()
+                        )
+                    )
+                }
             }
 
             is GameAction.OnClickerPositioned -> {
@@ -149,6 +156,12 @@ class GameViewModel @Inject constructor(
 
             is GameAction.OnStatisticsPositioned -> {
                 extraClickersManager.statisticsAreaBounds = action.bounds
+            }
+
+            GameAction.OnDialogDismissed -> {
+                _stateUi.update {
+                    it.copy(dialogState = null)
+                }
             }
         }
     }

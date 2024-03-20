@@ -15,4 +15,5 @@
     <string name="upgrade_cursor_speed_text">Increase Cursor\'s Speed</string>
     <string name="boost_income_x2">X2\nINCOME</string>
     <string name="boost_auto_click">AUTO\nCLICK</string>
+    <string name="action_close">Close</string>
 </resources>

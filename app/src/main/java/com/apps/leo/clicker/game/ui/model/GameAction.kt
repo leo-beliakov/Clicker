@@ -5,6 +5,7 @@ import androidx.compose.ui.unit.IntSize
 import com.apps.leo.clicker.game.domain.model.ExtraClickerInfo
 
 sealed interface GameAction {
+    object OnDialogDismissed : GameAction
     object OnClickerClicked : GameAction
     object onLevelUpgradeAnimationFinished : GameAction
     object OnSettingsClicked : GameAction

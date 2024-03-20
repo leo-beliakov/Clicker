@@ -13,8 +13,14 @@ data class GameUiState(
     val boosts: List<Boost> = emptyList(),
     val statistics: Statistics = Statistics(),
     val extraClickers: List<ExtraClickerInfo> = emptyList(),
-    val upgradeButtons: List<UpgradeButtonState> = emptyList()
+    val upgradeButtons: List<UpgradeButtonState> = emptyList(),
+    val dialogState: DialogState? = null
 ) {
+    data class DialogState(
+        val boost: Boost,
+        val text: String,
+    )
+
     data class Boost(
         val id: UUID,
         @DrawableRes val imageResId: Int,

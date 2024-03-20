@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.apps.leo.clicker.game.ui.composables.BoostConfirmationDialog
 import com.apps.leo.clicker.game.ui.composables.LevelSection
 import com.apps.leo.clicker.game.ui.composables.UpgradeButtonsSection
 import com.apps.leo.clicker.game.ui.composables.clicker.ClickerSection
@@ -36,6 +37,14 @@ fun GameScreen(
         sideEffects = sideEffects,
         onAction = viewModel::onAction
     )
+
+    state.dialogState?.let {
+        BoostConfirmationDialog(
+            boost = it.boost,
+            onConfirmed = {},
+            onDismissRequest = { viewModel.onAction(GameAction.OnDialogDismissed) }
+        )
+    }
 }
 
 @Composable
