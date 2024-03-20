@@ -4,8 +4,8 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.ui.graphics.Color
 import com.apps.leo.clicker.game.domain.model.ExtraClickerInfo
+import com.apps.leo.clicker.game.domain.model.GameState
 import com.apps.leo.clicker.game.domain.model.UpgradeType
-import java.util.UUID
 
 data class GameUiState(
     val levelText: String,
@@ -22,7 +22,7 @@ data class GameUiState(
     )
 
     data class Boost(
-        val id: UUID,
+        val type: GameState.BoostsState.BoostType,
         @DrawableRes val imageResId: Int,
         @DrawableRes val imageActivatedResId: Int,
         val color: Color,

@@ -23,10 +23,27 @@ data class GameState(
     }
 
     data class BoostsState(
-        val availableBoosts: List<Boost>,
-        val activeBoosts: List<Boost>
+        val availableBoosts: List<Boost> = emptyList(),
+        val activeBoosts: List<Boost> = emptyList(),
     ) {
-        class Boost
+        data class Boost(
+            val type: BoostType,
+            val state: BoostState
+        )
+
+        sealed interface BoostState {
+            object Available : BoostState
+            data class Active(
+                val timeTotal: Long,
+                val timeLeft: Long
+            ) : BoostState
+        }
+
+        enum class BoostType {
+            INCOME_X2,
+            INCOME_X6,
+            AUTO_CLICK
+        }
     }
 
     data class LevelState(

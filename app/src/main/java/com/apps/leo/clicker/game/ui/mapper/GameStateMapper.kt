@@ -10,7 +10,6 @@ import com.apps.leo.clicker.game.domain.model.GameState
 import com.apps.leo.clicker.game.domain.model.Upgrade
 import com.apps.leo.clicker.game.domain.model.UpgradeType
 import com.apps.leo.clicker.game.ui.model.GameUiState
-import java.util.UUID
 import javax.inject.Inject
 
 class GameStateMapper @Inject constructor(
@@ -34,24 +33,7 @@ class GameStateMapper @Inject constructor(
                 )
             },
             extraClickers = gameState.extraClickers,
-            boosts = listOf(
-                GameUiState.Boost(
-                    id = UUID.randomUUID(),
-                    imageResId = R.drawable.ic_income_x2,
-                    imageActivatedResId = R.drawable.ic_income_x2_zoom,
-                    color = Color.Blue,
-                    status = GameUiState.Boost.BoostStatus.TemporarilyAvailable(
-                        timeLeftPercentage = 0.6f,
-                    )
-                ),
-                GameUiState.Boost(
-                    id = UUID.randomUUID(),
-                    imageResId = R.drawable.ic_auto_click,
-                    imageActivatedResId = R.drawable.ic_auto_zoom,
-                    color = Color.Magenta,
-                    status = GameUiState.Boost.BoostStatus.PermanentlyAvailable
-                )
-            )
+            boosts = mapBoosts(gameState.boosts)
         )
     }
 
@@ -92,6 +74,64 @@ class GameStateMapper @Inject constructor(
                 UpgradeType.CURSOR_SPEED -> R.drawable.ic_cursor_upgrade
             },
         )
+    }
+
+    private fun mapBoosts(boosts: GameState.BoostsState): List<GameUiState.Boost> {
+        val activeBoosts = boosts.activeBoosts.map { boost ->
+            GameUiState.Boost(
+                type = boost.type,
+                imageResId = when (boost.type) {
+                    GameState.BoostsState.BoostType.INCOME_X2 -> R.drawable.ic_income_x2
+                    GameState.BoostsState.BoostType.INCOME_X6 -> R.drawable.ic_income_x6
+                    GameState.BoostsState.BoostType.AUTO_CLICK -> R.drawable.ic_auto_click
+                },
+                imageActivatedResId = when (boost.type) {
+                    GameState.BoostsState.BoostType.INCOME_X2 -> R.drawable.ic_income_x2_zoom
+                    GameState.BoostsState.BoostType.INCOME_X6 -> R.drawable.ic_income_x6_zoom
+                    GameState.BoostsState.BoostType.AUTO_CLICK -> R.drawable.ic_auto_click
+                },
+                color = when (boost.type) {
+                    GameState.BoostsState.BoostType.INCOME_X2 -> Color.Green
+                    GameState.BoostsState.BoostType.INCOME_X6 -> Color.Yellow
+                    GameState.BoostsState.BoostType.AUTO_CLICK -> Color.Magenta
+                },
+                status = when (val state = boost.state) {
+                    is GameState.BoostsState.BoostState.Available -> GameUiState.Boost.BoostStatus.PermanentlyAvailable
+                    is GameState.BoostsState.BoostState.Active -> GameUiState.Boost.BoostStatus.Activated(
+                        timeLeftPercentage = state.timeLeft.toFloat() / state.timeTotal
+                    )
+                }
+            )
+        }
+
+        val availableBoosts = boosts.availableBoosts.map { boost ->
+            GameUiState.Boost(
+                type = boost.type,
+                imageResId = when (boost.type) {
+                    GameState.BoostsState.BoostType.INCOME_X2 -> R.drawable.ic_income_x2
+                    GameState.BoostsState.BoostType.INCOME_X6 -> R.drawable.ic_income_x6
+                    GameState.BoostsState.BoostType.AUTO_CLICK -> R.drawable.ic_auto_click
+                },
+                imageActivatedResId = when (boost.type) {
+                    GameState.BoostsState.BoostType.INCOME_X2 -> R.drawable.ic_income_x2_zoom
+                    GameState.BoostsState.BoostType.INCOME_X6 -> R.drawable.ic_income_x6_zoom
+                    GameState.BoostsState.BoostType.AUTO_CLICK -> R.drawable.ic_auto_click
+                },
+                color = when (boost.type) {
+                    GameState.BoostsState.BoostType.INCOME_X2 -> Color.Green
+                    GameState.BoostsState.BoostType.INCOME_X6 -> Color.Yellow
+                    GameState.BoostsState.BoostType.AUTO_CLICK -> Color.Magenta
+                },
+                status = when (val state = boost.state) {
+                    is GameState.BoostsState.BoostState.Available -> GameUiState.Boost.BoostStatus.PermanentlyAvailable
+                    is GameState.BoostsState.BoostState.Active -> GameUiState.Boost.BoostStatus.Activated(
+                        timeLeftPercentage = state.timeLeft.toFloat() / state.timeTotal
+                    )
+                }
+            )
+        }
+
+        return activeBoosts + availableBoosts
     }
 
     private fun formatIncome(passiveIncome: Long): String {

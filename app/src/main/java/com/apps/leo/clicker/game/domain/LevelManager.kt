@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.math.max
 import kotlin.math.min
 
@@ -17,6 +18,7 @@ private const val LEVEL_PROGRESS_DECREASE_PER_TICK = 0.02f
 private const val NEW_LEVEL_PROGRESS_EXCEED_THRESHOLD = 0.03f
 private const val LEVEL_PROGRESS_PER_CLICK = 0.07f
 
+@Singleton
 class LevelManager @Inject constructor() {
 
     private val coroutineScope = CoroutineScope(Job())

@@ -10,10 +10,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Singleton
 
 private const val PASSIVE_INCOME_TICK = 1000L
 const val PASSIVE_INCOME_WORKERS_REQUIRED_FOR_UPGRADE = 3
 
+@Singleton
 class PassiveIncomeManager @Inject constructor() {
 
     private val coroutineScope = CoroutineScope(Job())

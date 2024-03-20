@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.apps.leo.clicker.game.common.collections.swap
 import com.apps.leo.clicker.game.common.random.nextFloat
 import com.apps.leo.clicker.game.common.ui.formatAmountOfMoney
+import com.apps.leo.clicker.game.domain.BoostsManager
 import com.apps.leo.clicker.game.domain.ExtraClickersManager
 import com.apps.leo.clicker.game.domain.GetInitialUpgradesUseCase
 import com.apps.leo.clicker.game.domain.GetUpgradePriceUseCase
@@ -33,6 +34,7 @@ import kotlin.random.Random
 @HiltViewModel
 class GameViewModel @Inject constructor(
     private val levelManager: LevelManager,
+    private val boostsManager: BoostsManager,
     private val passiveIncomeManager: PassiveIncomeManager,
     private val extraClickersManager: ExtraClickersManager,
     private val getInitialUpgrades: GetInitialUpgradesUseCase,
@@ -52,6 +54,7 @@ class GameViewModel @Inject constructor(
 
     init {
         subscribeToLevelState()
+        subscribeToBoosts()
 //        subscribeToExtraClickersState()
         subscribeToPassiveIncomeState()
 
@@ -69,6 +72,14 @@ class GameViewModel @Inject constructor(
                     level = levelState,
                     extraClickerIncome = levelState.currentLevel * 300L, //todo economy??
                 )
+            }
+        }.launchIn(viewModelScope)
+    }
+
+    private fun subscribeToBoosts() {
+        boostsManager.state.onEach { boosts ->
+            _state.update {
+                it.copy(boosts = boosts)
             }
         }.launchIn(viewModelScope)
     }
