@@ -41,7 +41,7 @@ fun GameScreen(
     state.dialogState?.let {
         BoostConfirmationDialog(
             boost = it.boost,
-            onConfirmed = {},
+            onConfirmed = { viewModel.onAction(GameAction.OnBoostConfirmed(it)) },
             onDismissRequest = { viewModel.onAction(GameAction.OnDialogDismissed) }
         )
     }

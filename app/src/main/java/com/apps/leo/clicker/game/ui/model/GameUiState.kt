@@ -2,44 +2,22 @@ package com.apps.leo.clicker.game.ui.model
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.compose.ui.graphics.Color
 import com.apps.leo.clicker.game.domain.model.ExtraClickerInfo
-import com.apps.leo.clicker.game.domain.model.GameState
 import com.apps.leo.clicker.game.domain.model.UpgradeType
 
 data class GameUiState(
     val levelText: String,
     val levelPercentage: Float,
-    val boosts: List<Boost> = emptyList(),
+    val boosts: List<BoostUi> = emptyList(),
     val statistics: Statistics = Statistics(),
     val extraClickers: List<ExtraClickerInfo> = emptyList(),
     val upgradeButtons: List<UpgradeButtonState> = emptyList(),
     val dialogState: DialogState? = null
 ) {
     data class DialogState(
-        val boost: Boost,
+        val boost: BoostUi,
         val text: String,
     )
-
-    data class Boost(
-        val type: GameState.BoostsState.BoostType,
-        @DrawableRes val imageResId: Int,
-        @DrawableRes val imageActivatedResId: Int,
-        val color: Color,
-        val status: BoostStatus
-    ) {
-        sealed class BoostStatus {
-            object PermanentlyAvailable : BoostStatus()
-
-            data class TemporarilyAvailable(
-                val timeLeftPercentage: Float,
-            ) : BoostStatus()
-
-            data class Activated(
-                val timeLeftPercentage: Float,
-            ) : BoostStatus()
-        }
-    }
 
     data class Statistics(
         val total: String = "",

@@ -30,12 +30,13 @@ import androidx.compose.ui.window.Dialog
 import com.apps.leo.clicker.R
 import com.apps.leo.clicker.game.common.ui.composables.clickable.invisibleClickable
 import com.apps.leo.clicker.game.common.ui.composables.text.OutlinedText
-import com.apps.leo.clicker.game.ui.model.GameUiState
+import com.apps.leo.clicker.game.domain.model.Boost
+import com.apps.leo.clicker.game.ui.model.BoostUi
 
 @Composable
 fun BoostConfirmationDialog(
-    boost: GameUiState.Boost,
-    onConfirmed: () -> Unit,
+    boost: BoostUi,
+    onConfirmed: (Boost.Type) -> Unit,
     onDismissRequest: () -> Unit
 ) {
     Dialog(onDismissRequest = onDismissRequest) {
@@ -56,8 +57,8 @@ fun BoostConfirmationDialog(
 
 @Composable
 private fun DialogContent(
-    boost: GameUiState.Boost,
-    onConfirmed: () -> Unit
+    boost: BoostUi,
+    onConfirmed: (Boost.Type) -> Unit
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -84,7 +85,7 @@ private fun DialogContent(
             border = BorderStroke(4.dp, Color.Blue),
             colors = ButtonDefaults.buttonColors(containerColor = Color.Green),
             shape = RoundedCornerShape(12.dp),
-            onClick = onConfirmed
+            onClick = { onConfirmed(boost.type) }
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,

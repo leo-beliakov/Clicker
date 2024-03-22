@@ -6,9 +6,11 @@ import com.apps.leo.clicker.game.common.ui.formatAmountOfMoney
 import com.apps.leo.clicker.game.domain.CalculatePassiveIncomeUseCase
 import com.apps.leo.clicker.game.domain.CheckIfUpgradeIsAvailableUseCase
 import com.apps.leo.clicker.game.domain.CheckIfUpgradeIsMaxUseCase
+import com.apps.leo.clicker.game.domain.model.Boost
 import com.apps.leo.clicker.game.domain.model.GameState
 import com.apps.leo.clicker.game.domain.model.Upgrade
 import com.apps.leo.clicker.game.domain.model.UpgradeType
+import com.apps.leo.clicker.game.ui.model.BoostUi
 import com.apps.leo.clicker.game.ui.model.GameUiState
 import javax.inject.Inject
 
@@ -76,62 +78,37 @@ class GameStateMapper @Inject constructor(
         )
     }
 
-    private fun mapBoosts(boosts: GameState.BoostsState): List<GameUiState.Boost> {
-        val activeBoosts = boosts.activeBoosts.map { boost ->
-            GameUiState.Boost(
+    private fun mapBoosts(boosts: List<Boost>): List<BoostUi> {
+        return boosts.map { boost ->
+            BoostUi(
                 type = boost.type,
                 imageResId = when (boost.type) {
-                    GameState.BoostsState.BoostType.INCOME_X2 -> R.drawable.ic_income_x2
-                    GameState.BoostsState.BoostType.INCOME_X6 -> R.drawable.ic_income_x6
-                    GameState.BoostsState.BoostType.AUTO_CLICK -> R.drawable.ic_auto_click
+                    Boost.Type.INCOME_X2 -> R.drawable.ic_income_x2
+                    Boost.Type.INCOME_X6 -> R.drawable.ic_income_x6
+                    Boost.Type.AUTO_CLICK -> R.drawable.ic_auto_click
                 },
                 imageActivatedResId = when (boost.type) {
-                    GameState.BoostsState.BoostType.INCOME_X2 -> R.drawable.ic_income_x2_zoom
-                    GameState.BoostsState.BoostType.INCOME_X6 -> R.drawable.ic_income_x6_zoom
-                    GameState.BoostsState.BoostType.AUTO_CLICK -> R.drawable.ic_auto_click
+                    Boost.Type.INCOME_X2 -> R.drawable.ic_income_x2_zoom
+                    Boost.Type.INCOME_X6 -> R.drawable.ic_income_x6_zoom
+                    Boost.Type.AUTO_CLICK -> R.drawable.ic_auto_click
                 },
                 color = when (boost.type) {
-                    GameState.BoostsState.BoostType.INCOME_X2 -> Color.Green
-                    GameState.BoostsState.BoostType.INCOME_X6 -> Color.Yellow
-                    GameState.BoostsState.BoostType.AUTO_CLICK -> Color.Magenta
+                    Boost.Type.INCOME_X2 -> Color.Green
+                    Boost.Type.INCOME_X6 -> Color.Yellow
+                    Boost.Type.AUTO_CLICK -> Color.Magenta
                 },
                 status = when (val state = boost.state) {
-                    is GameState.BoostsState.BoostState.Available -> GameUiState.Boost.BoostStatus.PermanentlyAvailable
-                    is GameState.BoostsState.BoostState.Active -> GameUiState.Boost.BoostStatus.Activated(
+                    Boost.State.Available -> BoostUi.BoostStatus.PermanentlyAvailable
+                    is Boost.State.Active -> BoostUi.BoostStatus.Activated(
+                        timeLeftPercentage = state.timeLeft.toFloat() / state.timeTotal
+                    )
+
+                    is Boost.State.TemporaryAvailable -> BoostUi.BoostStatus.TemporarilyAvailable(
                         timeLeftPercentage = state.timeLeft.toFloat() / state.timeTotal
                     )
                 }
             )
         }
-
-        val availableBoosts = boosts.availableBoosts.map { boost ->
-            GameUiState.Boost(
-                type = boost.type,
-                imageResId = when (boost.type) {
-                    GameState.BoostsState.BoostType.INCOME_X2 -> R.drawable.ic_income_x2
-                    GameState.BoostsState.BoostType.INCOME_X6 -> R.drawable.ic_income_x6
-                    GameState.BoostsState.BoostType.AUTO_CLICK -> R.drawable.ic_auto_click
-                },
-                imageActivatedResId = when (boost.type) {
-                    GameState.BoostsState.BoostType.INCOME_X2 -> R.drawable.ic_income_x2_zoom
-                    GameState.BoostsState.BoostType.INCOME_X6 -> R.drawable.ic_income_x6_zoom
-                    GameState.BoostsState.BoostType.AUTO_CLICK -> R.drawable.ic_auto_click
-                },
-                color = when (boost.type) {
-                    GameState.BoostsState.BoostType.INCOME_X2 -> Color.Green
-                    GameState.BoostsState.BoostType.INCOME_X6 -> Color.Yellow
-                    GameState.BoostsState.BoostType.AUTO_CLICK -> Color.Magenta
-                },
-                status = when (val state = boost.state) {
-                    is GameState.BoostsState.BoostState.Available -> GameUiState.Boost.BoostStatus.PermanentlyAvailable
-                    is GameState.BoostsState.BoostState.Active -> GameUiState.Boost.BoostStatus.Activated(
-                        timeLeftPercentage = state.timeLeft.toFloat() / state.timeTotal
-                    )
-                }
-            )
-        }
-
-        return activeBoosts + availableBoosts
     }
 
     private fun formatIncome(passiveIncome: Long): String {

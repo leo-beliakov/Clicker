@@ -112,10 +112,7 @@ class GameViewModel @Inject constructor(
                 currentLevel = 1,
                 isUpgrading = false
             ),
-            boosts = GameState.BoostsState(
-                availableBoosts = emptyList(),
-                activeBoosts = emptyList(),
-            )
+            boosts = emptyList()
         )
     }
 
@@ -167,6 +164,13 @@ class GameViewModel @Inject constructor(
 
             is GameAction.OnStatisticsPositioned -> {
                 extraClickersManager.statisticsAreaBounds = action.bounds
+            }
+
+            is GameAction.OnBoostConfirmed -> {
+                boostsManager.activateBoost(action.boostType)
+                _stateUi.update {
+                    it.copy(dialogState = null)
+                }
             }
 
             GameAction.OnDialogDismissed -> {

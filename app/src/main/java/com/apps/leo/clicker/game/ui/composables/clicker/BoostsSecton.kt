@@ -17,6 +17,7 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -27,7 +28,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.apps.leo.clicker.game.common.ui.composables.clickable.invisibleClickable
 import com.apps.leo.clicker.game.common.ui.composables.progress.HorizontalProgressBar
-import com.apps.leo.clicker.game.ui.model.GameUiState
+import com.apps.leo.clicker.game.ui.model.BoostUi
 import kotlin.math.sqrt
 
 
@@ -35,8 +36,8 @@ private const val BOOST_SIZE = 80
 
 @Composable
 fun BoostsSecton(
-    boosts: List<GameUiState.Boost>,
-    onBoostClicked: (boost: GameUiState.Boost) -> Unit,
+    boosts: List<BoostUi>,
+    onBoostClicked: (boost: BoostUi) -> Unit,
     modifier: Modifier = Modifier,
     onBoostsPositioned: (bounds: Rect) -> Unit,
 ) {
@@ -56,21 +57,21 @@ fun BoostsSecton(
 
 @Composable
 fun Boost(
-    boost: GameUiState.Boost,
-    onBoostClicked: (boost: GameUiState.Boost) -> Unit
+    boost: BoostUi,
+    onBoostClicked: (boost: BoostUi) -> Unit
 ) {
     when (boost.status) {
-        GameUiState.Boost.BoostStatus.PermanentlyAvailable -> PermanentBoost(
+        BoostUi.BoostStatus.PermanentlyAvailable -> PermanentBoost(
             boost = boost,
             onBoostClicked = onBoostClicked
         )
 
-        is GameUiState.Boost.BoostStatus.TemporarilyAvailable -> TemporaryBoost(
+        is BoostUi.BoostStatus.TemporarilyAvailable -> TemporaryBoost(
             boost = boost,
             onBoostClicked = onBoostClicked
         )
 
-        is GameUiState.Boost.BoostStatus.Activated -> ActivatedBoost(
+        is BoostUi.BoostStatus.Activated -> ActivatedBoost(
             boost = boost,
             onBoostClicked = onBoostClicked
         )
@@ -79,8 +80,8 @@ fun Boost(
 
 @Composable
 fun PermanentBoost(
-    boost: GameUiState.Boost,
-    onBoostClicked: (boost: GameUiState.Boost) -> Unit
+    boost: BoostUi,
+    onBoostClicked: (boost: BoostUi) -> Unit
 ) {
     Image(
         painter = painterResource(id = boost.imageResId),
@@ -91,10 +92,10 @@ fun PermanentBoost(
 
 @Composable
 fun TemporaryBoost(
-    boost: GameUiState.Boost,
-    onBoostClicked: (boost: GameUiState.Boost) -> Unit
+    boost: BoostUi,
+    onBoostClicked: (boost: BoostUi) -> Unit
 ) {
-    val boostStatus = boost.status as GameUiState.Boost.BoostStatus.TemporarilyAvailable
+    val boostStatus = boost.status as BoostUi.BoostStatus.TemporarilyAvailable
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -120,10 +121,11 @@ fun TemporaryBoost(
 
 @Composable
 fun ActivatedBoost(
-    boost: GameUiState.Boost,
-    onBoostClicked: (boost: GameUiState.Boost) -> Unit
+    boost: BoostUi,
+    onBoostClicked: (boost: BoostUi) -> Unit
 ) {
     val imageResource = ImageBitmap.imageResource(id = boost.imageActivatedResId)
+    val activatedStatus = boost.status as BoostUi.BoostStatus.Activated //todo looks ugly
 
     Canvas(
         modifier = Modifier
@@ -171,11 +173,14 @@ fun ActivatedBoost(
         drawArc(
             color = boost.color,
             startAngle = -90f, // Starting from the top (-90 degrees)
-            sweepAngle = 360 * 0.4f,
+            sweepAngle = 360 * activatedStatus.timeLeftPercentage,
             useCenter = false,
             topLeft = topLeft,
             size = arcSize,
-            style = Stroke(width = strokeWidthPx)
+            style = Stroke(
+                cap = StrokeCap.Round,
+                width = strokeWidthPx
+            )
         )
 
         // Calculate the top left position to center the image

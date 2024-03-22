@@ -2,6 +2,7 @@ package com.apps.leo.clicker.game.ui.model
 
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.unit.IntSize
+import com.apps.leo.clicker.game.domain.model.Boost
 import com.apps.leo.clicker.game.domain.model.ExtraClickerInfo
 
 sealed interface GameAction {
@@ -14,6 +15,10 @@ sealed interface GameAction {
 
     data class OnClickerPositioned(
         val bounds: Rect
+    ) : GameAction
+
+    data class OnBoostConfirmed(
+        val boostType: Boost.Type
     ) : GameAction
 
     data class OnClickerAreaPositioned(
@@ -29,7 +34,7 @@ sealed interface GameAction {
     ) : GameAction
 
     data class OnBoostClicked(
-        val boost: GameUiState.Boost
+        val boost: BoostUi
     ) : GameAction
 
     data class OnUpgradeButtonClicked(

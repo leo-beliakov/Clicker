@@ -10,7 +10,7 @@ data class GameState(
     val level: LevelState,
     val upgrades: List<Upgrade>,
     val extraClickers: List<ExtraClickerInfo>,
-    val boosts: BoostsState,
+    val boosts: List<Boost>,
 ) {
     data class PassiveIncome(
         val workers: List<Worker> = emptyList(),
@@ -20,30 +20,6 @@ data class GameState(
         data class Worker(
             val level: Int = START_LEVEL
         )
-    }
-
-    data class BoostsState(
-        val availableBoosts: List<Boost> = emptyList(),
-        val activeBoosts: List<Boost> = emptyList(),
-    ) {
-        data class Boost(
-            val type: BoostType,
-            val state: BoostState
-        )
-
-        sealed interface BoostState {
-            object Available : BoostState
-            data class Active(
-                val timeTotal: Long,
-                val timeLeft: Long
-            ) : BoostState
-        }
-
-        enum class BoostType {
-            INCOME_X2,
-            INCOME_X6,
-            AUTO_CLICK
-        }
     }
 
     data class LevelState(

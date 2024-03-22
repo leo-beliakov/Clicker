@@ -13,15 +13,16 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.apps.leo.clicker.game.domain.model.ExtraClickerInfo
+import com.apps.leo.clicker.game.ui.model.BoostUi
 import com.apps.leo.clicker.game.ui.model.GameSideEffects
 import com.apps.leo.clicker.game.ui.model.GameUiState
 import kotlinx.coroutines.flow.Flow
 
 @Composable
 fun ClickerSection(
-    boosts: List<GameUiState.Boost>,
+    boosts: List<BoostUi>,
     statistics: GameUiState.Statistics,
-    onBoostClicked: (boost: GameUiState.Boost) -> Unit,
+    onBoostClicked: (boost: BoostUi) -> Unit,
     onClickerClicked: () -> Unit,
     onExtraClickerClicked: (ExtraClickerInfo) -> Unit,
     onExtraClickerDisappeared: (ExtraClickerInfo) -> Unit,
