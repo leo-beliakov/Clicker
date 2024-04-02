@@ -16,7 +16,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.apps.leo.clicker.ui.theme.ClickerTheme
 import dagger.hilt.android.AndroidEntryPoint
-import javax.security.auth.login.LoginException
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -38,7 +37,7 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxSize()
                     ) {
                         Button(onClick = {
-                            throw LoginException("Login Exception")
+                            throw ExceptionInInitializerError("Test Exception")
                         }) {
                             Text(text = "Test")
                         }
